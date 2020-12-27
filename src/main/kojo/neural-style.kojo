@@ -71,10 +71,10 @@ class NeuralStyleFilter(model: String, style: String, alpha: Float) extends Imag
 
     val styleImage = image(style)
     val styleTensor = imgToTensor2(removeAlphaChannel(styleImage, white))
-    println("Loading model")
-    val savedModel = SavedModelBundle.load(model)
 
     def filter(src: BufferedImage) = {
+        println("Loading model")
+        val savedModel = SavedModelBundle.load(model)
         val args = new util.HashMap[String, Tensor[_]]()
         val inputTensor = imgToTensor2(removeAlphaChannel(src, white))
         println(s"Style Input: $inputTensor")
@@ -83,6 +83,7 @@ class NeuralStyleFilter(model: String, style: String, alpha: Float) extends Imag
         args.put("args_0_2", TFloat32.scalarOf(alpha))
         val out = savedModel.call(args).get("output_1").asInstanceOf[Tensor[TFloat32]]
         println(s"Style Input: $out")
+        savedModel.close()
         tensorToImg(out)
     }
 }
