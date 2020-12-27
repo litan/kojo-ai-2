@@ -11,7 +11,8 @@ This cut of kojo-ai currently supports neural style transfer (NST). An example s
 cleari()
 clearOutput()
 
-val fltr1 = new NeuralStyleFilter("/path/to/savedmodel/", "/path/to/style.jpg", 0.8f)
+val alpha = 0.8f
+val fltr1 = new NeuralStyleFilter("/path/to/savedmodel/", "/path/to/style.jpg", alpha)
 val drawing = Picture {
     setPenColor(cm.gray)
     var clr = cm.rgba(255, 0, 0, 127) // start with a semi transparent red color
