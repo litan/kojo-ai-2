@@ -3,7 +3,7 @@ Support for data science, machine learning, and more - within Kojo.
 
 A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This is the next cut, based on the official tensorflow-java api
 
-This cut of kojo-ai currently supports neural style transfer (NST). An example showing NST in action is given below:
+This cut of kojo-ai adds support for neural style transfer (NST). An example showing NST in action is given below:
 
 ```scala
 // #include /home/lalit/work/kojo-ai-2/src/main/kojo/neural-style.kojo
