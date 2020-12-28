@@ -5,7 +5,10 @@ version := "0.1"
 scalaVersion := "2.13.3"
 
 libraryDependencies ++= Seq(
-  "org.tensorflow" % "tensorflow-core-platform" % "0.2.0"
+  "org.tensorflow" % "tensorflow-core-platform" % "0.2.0",
+  "org.tensorflow" % "tensorflow-framework" % "0.2.0",
+  "org.knowm.xchart" % "xchart" % "3.7.0",
+  "org.apache.commons" % "commons-math3" % "3.6.1"
 )
 
 //Build distribution
