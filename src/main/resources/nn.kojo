@@ -5,4 +5,5 @@ import org.tensorflow.op.Ops
 import org.tensorflow.op.core.Placeholder
 import org.tensorflow.types.TFloat32
 import org.tensorflow.{Graph, Session}
+import org.tensorflow.op.random.TruncatedNormal
 import net.kogics.kojo.preprocess._

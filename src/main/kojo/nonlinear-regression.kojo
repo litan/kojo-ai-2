@@ -1,6 +1,5 @@
 // #include /nn.kojo
 // #include /plot.kojo
-import org.tensorflow.op.random.TruncatedNormal
 
 cleari()
 clearOutput()
