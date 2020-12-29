@@ -32,7 +32,6 @@ package object preprocess {
     def fit(data: Array[Double]) = {
       mean = StatUtils.mean(data)
       std = math.sqrt(StatUtils.variance(data, mean))
-      println(mean, std)
     }
 
     def transform(data: Array[Double]) = {

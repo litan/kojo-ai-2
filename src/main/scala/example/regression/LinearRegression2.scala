@@ -93,7 +93,6 @@ object LinearRegression2 {
     def predict(xValues: Array[Float]): Array[Float] = {
       // Define placeholders
       val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
-      val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
 
       // Define the model function weight*x + bias
       val mul = tf.math.mul(xData, weight)
