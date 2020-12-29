@@ -9,7 +9,7 @@ val b = 3
 val c = 1
 
 val xData0 = Array.tabulate(20)(e => (e + 1).toDouble)
-val yData0 = xData0 map (x => a * x * x + b * x + c + randomDouble(30) - 15)
+val yData0 = xData0 map (x => a * x * x + b * x + c + random(-15, 15))
 
 val xNormalizer = new StandardScaler()
 val yNormalizer = new MaxAbsScaler()
@@ -17,7 +17,7 @@ val yNormalizer = new MaxAbsScaler()
 val xData = xNormalizer.fitTransform(xData0)
 val yData = yNormalizer.fitTransform(yData0)
 
-val chart = scatterChart("Regression Data", "X", "Y", xData0, yData)
+val chart = scatterChart("Regression Data", "X", "Y", xData0, yData0)
 chart.getStyler.setLegendVisible(true)
 drawChart(chart)
 
@@ -27,7 +27,8 @@ val yDataf = yData.map(_.toFloat)
 val model = new NonlinearModel
 model.train(xDataf, yDataf)
 val yPreds = model.predict(xDataf)
-addLineToChart(chart, Some("model"), xData0, yPreds.map(_.toDouble))
+val yPreds0 = yNormalizer.inverseTransform(yPreds.map(_.toDouble))
+addLineToChart(chart, Some("model"), xData0, yPreds0)
 drawChart(chart)
 model.close()
 
