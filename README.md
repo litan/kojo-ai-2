@@ -6,7 +6,7 @@ A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This
 This cut of kojo-ai adds support for neural style transfer (NST). An example showing NST in action is given below:
 
 ```scala
-// #include /home/lalit/work/kojo-ai-2/src/main/kojo/neural-style.kojo
+// #include /nst.kojo
 
 cleari()
 clearOutput()
@@ -31,4 +31,3 @@ val drawing = Picture {
 val pic = effect(fltr1) -> drawing
 draw(pic)
 ```
-
