@@ -12,7 +12,7 @@ val xData0 = Array.tabulate(20)(e => (e + 1).toDouble)
 val yData0 = xData0 map (x => a * x * x + b * x + c + random(-15, 15))
 
 val xNormalizer = new StandardScaler()
-val yNormalizer = new MaxAbsScaler()
+val yNormalizer = new StandardScaler()
 
 val xData = xNormalizer.fitTransform(xData0)
 val yData = yNormalizer.fitTransform(yData0)
