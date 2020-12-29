@@ -1,16 +1,13 @@
 import java.awt.image.BufferedImage
-import java.io.{ BufferedInputStream, File, FileInputStream }
-import java.nio.FloatBuffer
 import java.util
 
-import javax.imageio.ImageIO
-import org.tensorflow.{ SavedModelBundle, Tensor }
-import org.tensorflow.types.{ TFloat32, TUint8 }
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.ndarray.buffer.DataBuffers
+import org.tensorflow.types.TFloat32
+import org.tensorflow.{SavedModelBundle, Tensor}
 
 class NeuralStyleFilter(model: String, style: String, alpha: Float) extends ImageOp {
-    def imgToTensor2(image: BufferedImage): Tensor[TFloat32] = {
+    def imgToTensor(image: BufferedImage): Tensor[TFloat32] = {
         import java.nio.ByteBuffer
         val h = image.getHeight
         val w = image.getWidth
@@ -70,13 +67,13 @@ class NeuralStyleFilter(model: String, style: String, alpha: Float) extends Imag
     }
 
     val styleImage = image(style)
-    val styleTensor = imgToTensor2(removeAlphaChannel(styleImage, white))
+    val styleTensor = imgToTensor(removeAlphaChannel(styleImage, white))
 
     def filter(src: BufferedImage) = {
         println("Loading model")
         val savedModel = SavedModelBundle.load(model)
         val args = new util.HashMap[String, Tensor[_]]()
-        val inputTensor = imgToTensor2(removeAlphaChannel(src, white))
+        val inputTensor = imgToTensor(removeAlphaChannel(src, white))
         println(s"Style Input: $inputTensor")
         args.put("args_0", inputTensor)
         args.put("args_0_1", styleTensor)
