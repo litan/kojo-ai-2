@@ -91,6 +91,35 @@ def imgToTensorI(image: BufferedImage): Tensor[TUint8] = {
 case class DetectionOutput(boxes: Tensor[TFloat32], scores: Tensor[TFloat32], classes: Tensor[TFloat32], num: Tensor[TFloat32])
 
 def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: ArrayBuffer[Picture]) {
+    val w = src.getWidth
+    val h = src.getHeight
+    val xmin = w * box(1)
+    val xmax = w * box(3)
+    val ymin1 = h * box(0)
+    val ymax = h - ymin1
+    val ymax1 = h * box(2)
+    val ymin = h - ymax1
+    //    println(xmin, xmax, ymin, ymax)
+    //    println(box)
+    val bbox = Picture.rectangle(xmax - xmin, ymax - ymin)
+    val bbox2 = Picture.rectangle(xmax - xmin, ymax - ymin)
+    val lbl = Picture.text(label)
+    val lbl2 = Picture.text(label)
+    draw(bbox2, bbox, lbl2, lbl)
+    bbox.setPosition(xmin, ymin)
+    bbox2.setPosition(xmin, ymin)
+    bbox.setPenColor(ColorMaker.hsl(60, 0.91, 0.68))
+    bbox2.setPenColor(darkGray)
+    bbox.setPenThickness(4)
+    bbox2.setPenThickness(6)
+    lbl.setPosition(xmin, ymin)
+    lbl.setPenColor(yellow)
+    lbl2.setPosition(xmin + 1, ymin - 1)
+    lbl2.setPenColor(black)
+    pics2.append(bbox2, bbox, lbl2, lbl)
+
+}
+
 def drawBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
     val num = detectionOutput.num.data.getFloat().toInt
     //    println(s"Objects detected: $num")
