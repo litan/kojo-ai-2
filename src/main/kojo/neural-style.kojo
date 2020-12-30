@@ -79,7 +79,7 @@ class NeuralStyleFilter(model: String, style: String, alpha: Float) extends Imag
         args.put("args_0_1", styleTensor)
         args.put("args_0_2", TFloat32.scalarOf(alpha))
         val out = savedModel.call(args).get("output_1").asInstanceOf[Tensor[TFloat32]]
-        println(s"Style Input: $out")
+        println(s"Style Output: $out")
         savedModel.close()
         tensorToImg(out)
     }
