@@ -80,6 +80,7 @@ object LinearRegression {
         val xTensor = TFloat32.scalarOf(x)
         val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
         predictedY = yPredictedTensor.data.getFloat()
+        xTensor.close(); yPredictedTensor.close()
         System.out.println("Predicted value: " + predictedY)
       }
     }

@@ -7,6 +7,7 @@ import org.tensorflow.types.TFloat32
 import org.tensorflow.types.TUint8
 import com.github.sarxos.webcam.Webcam
 import org.tensorflow.SavedModelBundle
+import net.kogics.kojo.tensorutil._
 
 val fps = 5
 cleari()
@@ -64,30 +65,6 @@ finally {
     savedModel.close()
 }
 
-def imgToTensorI(image: BufferedImage): Tensor[TUint8] = {
-    import java.nio.ByteBuffer
-    val h = image.getHeight
-    val w = image.getWidth
-    val imgBuffer = ByteBuffer.allocate(h * w * 3)
-
-    for (y <- 0 until h) {
-        for (x <- 0 until w) {
-            val pixel = image.getRGB(x, y)
-            val red = (pixel >> 16) & 0xff
-            val green = (pixel >> 8) & 0xff
-            val blue = pixel & 0xff
-            imgBuffer.put(red.toByte)
-            imgBuffer.put(green.toByte)
-            imgBuffer.put(blue.toByte)
-        }
-    }
-    imgBuffer.flip()
-    val shape = Shape.of(1, image.getHeight, image.getWidth, 3)
-    val db = DataBuffers.of(imgBuffer)
-    val t2 = TUint8.tensorOf(shape, db)
-    t2
-}
-
 case class DetectionOutput(boxes: Tensor[TFloat32], scores: Tensor[TFloat32], classes: Tensor[TFloat32], num: Tensor[TFloat32])
 
 def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: ArrayBuffer[Picture]) {
@@ -117,7 +94,6 @@ def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: A
     lbl2.setPosition(xmin + 1, ymin - 1)
     lbl2.setPenColor(black)
     pics2.append(bbox2, bbox, lbl2, lbl)
-
 }
 
 def drawBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {

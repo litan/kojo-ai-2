@@ -90,7 +90,7 @@ class Model {
             val xTensor = TFloat32.scalarOf(x)
             val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
             val predictedY = yPredictedTensor.data.getFloat()
-            xTensor.close()
+            xTensor.close(); yPredictedTensor.close()
             predictedY
         }
     }

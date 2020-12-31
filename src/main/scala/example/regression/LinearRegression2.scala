@@ -103,7 +103,7 @@ object LinearRegression2 {
         val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
         val predictedY = yPredictedTensor.data.getFloat()
         System.out.println("Predicted value: " + predictedY)
-        xTensor.close()
+        xTensor.close(); yPredictedTensor.close()
         predictedY
       }
     }

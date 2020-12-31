@@ -114,6 +114,7 @@ class NonlinearModel {
         val predictedY = new Array[Float](xValues.length)
         val predictedYBuffer = yPredictedTensor.rawData().asFloats()
         predictedYBuffer.read(predictedY)
+        xTensor.close(); yPredictedTensor.close()
         predictedY
     }
 
