@@ -3,7 +3,14 @@ Support for data science, machine learning, and more - within Kojo.
 
 A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This is the next cut, based on the official tensorflow-java api
 
-This cut of kojo-ai adds support for neural style transfer (NST). An example showing NST in action is given below:
+### Current Features (work in progress, but functional):
+* Neural Networks (via Tensorflow Java)
+* Plotting (via XCharts)
+* Graphs (Bfs, Dfs, A* search, etc)
+* Neural Style Transfer (NST)
+
+#### NST Example
+An example showing NST in action is given below:
 
 ```scala
 // #include /nst.kojo
@@ -37,7 +44,7 @@ val pic = effect(fltr1) -> drawing
 draw(pic)
 ```
 
-### Example images
+#### Example Style Transfer images
 
 **Original Kojo Drawing**:
 
