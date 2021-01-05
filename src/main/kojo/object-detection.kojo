@@ -6,6 +6,7 @@ import org.tensorflow.ndarray.Shape
 import org.tensorflow.ndarray.buffer.DataBuffers
 import org.tensorflow.types.TFloat32
 import org.tensorflow.types.TUint8
+import net.kogics.kojo.tensorutil._
 
 val labelsFile = scala.io.Source.fromFile("/home/lalit/work/kojo-ai-2/src/main/kojo/mscoco-labels.txt")
 val labels = HashMap.empty[Int, String]
@@ -13,30 +14,6 @@ labelsFile.getLines.zipWithIndex.foreach { case (line, idx) =>
         labels.put(idx + 1, line.trim)
 }
 labelsFile.close()
-
-def imgToTensorI(image: BufferedImage): Tensor[TUint8] = {
-    import java.nio.ByteBuffer
-    val h = image.getHeight
-    val w = image.getWidth
-    val imgBuffer = ByteBuffer.allocate(h * w * 3)
-
-    for (y <- 0 until h) {
-        for (x <- 0 until w) {
-            val pixel = image.getRGB(x, y)
-            val red = (pixel >> 16) & 0xff
-            val green = (pixel >> 8) & 0xff
-            val blue = pixel & 0xff
-            imgBuffer.put(red.toByte)
-            imgBuffer.put(green.toByte)
-            imgBuffer.put(blue.toByte)
-        }
-    }
-    imgBuffer.flip()
-    val shape = Shape.of(1, image.getHeight, image.getWidth, 3)
-    val db = DataBuffers.of(imgBuffer)
-    val t2 = TUint8.tensorOf(shape, db)
-    t2
-}
 
 case class DetectionOutput(boxes: Tensor[TFloat32], scores: Tensor[TFloat32], classes: Tensor[TFloat32], num: Tensor[TFloat32])
 
