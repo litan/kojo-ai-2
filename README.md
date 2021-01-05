@@ -7,7 +7,12 @@ A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This
 * Neural Networks (via Tensorflow Java)
 * Plotting (via XCharts)
 * Graphs (Bfs, Dfs, A* search, etc)
-* Neural Style Transfer (NST)
+* Neural Style Transfer (NST) (via Tensorflow Java and [Arbitrary Style Transfer](https://github.com/emla2805/arbitrary-style-transfer))
+
+To use Kojo-AI within Kojo, just [use a published release](https://github.com/litan/kojo-ai-2/releases), or copy artifacts from this repo into the Kojo libk directory as per the following steps:  
+`sbt buildDist`  
+`mv ~/.kojo/lite/libk ~/.kojo/lite/libk.bak`  
+`cp -var dist ~/.kojo/lite/libk`
 
 #### NST Example
 An example showing NST in action is given below:
@@ -44,7 +49,7 @@ val pic = effect(fltr1) -> drawing
 draw(pic)
 ```
 
-#### Example Style Transfer images
+#### NST sample images
 
 **Original Kojo Drawing**:
 
