@@ -13,6 +13,8 @@ clearOutput()
 
 val alpha = 0.8f
 val fltr1 = new NeuralStyleFilter("/path/to/savedmodel/", "/path/to/style.jpg", alpha)
+// val fltr2 = new NeuralStyleFilter("/path/to/savedmodel/", "/path/to/style2.jpg", alpha)
+
 val drawing = Picture {
     setPenColor(cm.gray)
     var clr = cm.rgba(255, 0, 0, 127) // start with a semi transparent red color
@@ -29,5 +31,23 @@ val drawing = Picture {
 }
 
 val pic = effect(fltr1) -> drawing
+// or apply two filters
+// val pic = effect(fltr1) * effect(fltr2) -> drawing
+
 draw(pic)
 ```
+
+### Example images
+
+**Original Kojo Drawing**:
+
+![nst0](nst-examples/nst0.png)
+
+**Drawing with one NST filter applied**:
+
+![nst1](nst-examples/nst1.png)
+
+**Drawing with two NST filters applied**:
+
+![nst2](nst-examples/nst2.png)
+
