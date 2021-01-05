@@ -1,7 +1,7 @@
 # Kojo-AI
 Support for data science, machine learning, and more - within [Kojo](https://www.kogics.net/kojo).
 
-A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This is the next cut, based on the official [Tensorflow-Java](https://github.com/tensorflow/java) api
+A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This is the next cut, based on the official [Tensorflow-Java](https://github.com/tensorflow/java) API.
 
 ### Current Features (work in progress, but functional):
 * Neural Networks (via Tensorflow-Java)
