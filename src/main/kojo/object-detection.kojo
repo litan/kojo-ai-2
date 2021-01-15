@@ -10,7 +10,8 @@ import net.kogics.kojo.tensorutil._
 
 val labelsFile = scala.io.Source.fromFile("/home/lalit/work/kojo-ai-2/src/main/kojo/mscoco-labels.txt")
 val labels = HashMap.empty[Int, String]
-labelsFile.getLines.zipWithIndex.foreach { case (line, idx) =>
+labelsFile.getLines.zipWithIndex.foreach {
+    case (line, idx) =>
         labels.put(idx + 1, line.trim)
 }
 labelsFile.close()
@@ -45,8 +46,6 @@ def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String) {
 
 def drawBoxes(detectionOutput: DetectionOutput) {
     val num = detectionOutput.num.data.getFloat().toInt
-    println(s"Objects detected: $num")
-    println(detectionOutput)
     for (i <- 0 until detectionOutput.boxes.shape.size(1).toInt) {
         val score = detectionOutput.scores.data.getFloat(0, i)
         if (score > 0.3) {
@@ -58,8 +57,6 @@ def drawBoxes(detectionOutput: DetectionOutput) {
             val code = detectionOutput.classes.data.getFloat(0, i).toInt
             val label = labels.getOrElse(code, s"Unknown code - $code")
             drawBox(src, box, label)
-            println(label)
-            println("---")
         }
     }
 }
@@ -70,7 +67,11 @@ setBackground(white)
 
 val model = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
 //val model = "/home/lalit/work/object-det/models/ssd_inception_v2_coco_2017_11_17/saved_model"
-val src = image("/home/lalit/Downloads/elephant.jpg")
+val src = image("/home/lalit/Downloads/elephants.jpeg")
+
+val pic = Picture.image(src)
+draw(pic)
+
 val savedModel = SavedModelBundle.load(model)
 val args = new util.HashMap[String, Tensor[_]]()
 val inputTensor = imgToTensorI(src)
@@ -83,6 +84,4 @@ val num = out.get("num_detections").asInstanceOf[Tensor[TFloat32]]
 savedModel.close()
 
 val detection = DetectionOutput(boxes, scores, classes, num)
-val pic = Picture.image(src)
-draw(pic)
 drawBoxes(detection)

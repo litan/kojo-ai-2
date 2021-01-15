@@ -13,7 +13,7 @@ case class GridCell(pos: GridPos, pic: Picture, var node: Option[GraphNode])
 val gridPoints = Array.ofDim[GridCell](n, n)
 
 val emptyCellColor = lightGray
-val nodeCellColor = blue
+val nodeCellColor = cm.blueViolet
 val edgeFirstCellColor = red
 val visitedColor = green
 
@@ -57,16 +57,21 @@ def addEdge(c1: GridCell, c2: GridCell) {
     edgePics += edge
 }
 
-def visitCallback(n: GraphNode) {
+def highlightNode(n: GraphNode, c: Color, r: Int): Picture = {
     val pos = n.data
     val cell = gridPoints(pos.x)(pos.y)
     val pic = cell.pic
-    val vpic = Picture.circle(15)
+    val vpic = Picture.circle(r)
     vpic.setPosition(pic.position)
-    vpic.setPenColor(visitedColor)
-    vpic.setFillColor(visitedColor)
+    vpic.setPenColor(c)
+    vpic.setFillColor(c)
     vpic.moveToBack()
     draw(vpic)
+    vpic
+}
+
+def visitCallback(n: GraphNode) {
+    val vpic = highlightNode(n, visitedColor, 20)
     visitedPics += vpic
     pause(1)
 }
@@ -90,7 +95,7 @@ def drawPath(start: Node[GridPos], path: Option[PathEdges[GridPos]]) {
     def drawEdgeBetweenPos(gridPos1: GridPos, gridPos2: GridPos) {
         val cell1 = gridPoints(gridPos1.x)(gridPos1.y)
         val cell2 = gridPoints(gridPos2.x)(gridPos2.y)
-        val edge = makeAndDrawEdge(cell1, cell2, white, 8, true)
+        val edge = makeAndDrawEdge(cell1, cell2, yellow, 8, true)
         pathPics += edge
     }
 
@@ -106,7 +111,7 @@ def drawPath(start: Node[GridPos], path: Option[PathEdges[GridPos]]) {
     }
 }
 
-def makeAndDrawEdge(cell1: GridCell, cell2: GridCell, color: Color = red,
+def makeAndDrawEdge(cell1: GridCell, cell2: GridCell, color: Color = blue,
                     width: Int = 2, back: Boolean = true): Picture = {
     val pos1 = cell1.pic.position; val pos2 = cell2.pic.position
     val edge = trans(pos1.x, pos1.y) * penColor(color) * penWidth(width) ->
@@ -229,6 +234,9 @@ loadNodesAndEdges(gNodes, gEdges)
 val g = ExplicitGraph(nodes, edges)
 val start = Node(GridPos(0, 0))
 val end = Node(GridPos(9, 9))
+
+highlightNode(start, red, 15)
+highlightNode(end, red, 15)
 
 def search(algo: String) {
     val path = algo match {
