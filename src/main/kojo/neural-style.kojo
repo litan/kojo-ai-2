@@ -1,3 +1,6 @@
+// A Kojo filter to enable NST in Kojo
+// This is not needed any more as an NST filter is now included in the Kojo-AI jar file
+// This is kept here for legacy reasons
 import java.awt.image.BufferedImage
 import java.util
 
