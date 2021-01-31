@@ -3,6 +3,7 @@
 Pre-requisites for running the example:
 * [Download and install](https://www.kogics.net/kojo-download) Kojo
 * Extract the kojo-ai libk directory for your platform under `~/kojo/lite` as explained in the [release notes](https://github.com/litan/kojo-ai-2/releases/tag/v0.2) for v0.2
+* Download and extract the [saved model](https://github.com/litan/kojo-ai-2/releases/download/v0.2/object_detection_saved_model.zip) for this example.
 
 After that, just run the example code below in Kojo.
 
