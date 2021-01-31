@@ -1,8 +1,8 @@
 ### Object Detection
 
-Before running this example, make sure that you have:
-* [Downloaded and installed](https://www.kogics.net/kojo-download) Kojo
-* Extracted the kojo-ai libk directory for your platform under `~/kojo/lite` as explained in the [release notes](https://github.com/litan/kojo-ai-2/releases/tag/v0.2) for v0.2
+Pre-requisites for running the example:
+* [Download and install](https://www.kogics.net/kojo-download) Kojo
+* Extract the kojo-ai libk directory for your platform under `~/kojo/lite` as explained in the [release notes](https://github.com/litan/kojo-ai-2/releases/tag/v0.2) for v0.2
 
 After that, just run the example code below in Kojo.
 
