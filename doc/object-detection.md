@@ -25,6 +25,10 @@ import org.tensorflow.types.TFloat32
 import org.tensorflow.types.TUint8
 import net.kogics.kojo.tensorutil._
 
+// you need to change the savedModel location based on where you downloaded the model
+val model = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
+//val model = "/home/lalit/work/object-det/models/ssd_inception_v2_coco_2017_11_17/saved_model"
+
 val labelsFile = scala.io.Source.fromFile("/home/lalit/work/kojo-ai-2/src/main/kojo/mscoco-labels.txt")
 val labels = HashMap.empty[Int, String]
 labelsFile.getLines.zipWithIndex.foreach {
@@ -82,8 +86,6 @@ cleari()
 clearOutput()
 setBackground(white)
 
-val model = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
-//val model = "/home/lalit/work/object-det/models/ssd_inception_v2_coco_2017_11_17/saved_model"
 val src = image("/home/lalit/work/kojo-ai-2/images/elephants-pixabay.jpg")
 // val src = image("/home/lalit/work/kojo-ai-2/images/horse-pixabay.jpg")
 
