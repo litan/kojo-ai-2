@@ -55,13 +55,13 @@ draw(pic)
 
 **Original Kojo Drawing**:
 
-![nst0](nst-examples/nst0.png)
+![nst0](images/nst-examples/nst0.png)
 
 **Drawing with one NST filter applied**:
 
-![nst1](nst-examples/nst1.png)
+![nst1](images/nst-examples/nst1.png)
 
 **Drawing with two NST filters applied**:
 
-![nst2](nst-examples/nst2.png)
+![nst2](images/nst-examples/nst2.png)
 
