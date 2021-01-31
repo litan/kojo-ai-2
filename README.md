@@ -7,7 +7,7 @@ A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This
 * [Neural](doc/linear-regression.md) [Networks](doc/nonlinear-regression.md) (via Tensorflow-Java).
 * Plotting (via XCharts).
 * [Graphs](https://github.com/litan/kojo-ai-2/blob/master/src/main/kojo/graph-workbench.kojo) (Bfs, Dfs, A* search, etc).
-* Neural Style Transfer (NST) (via Tensorflow-Java and [Arbitrary Style Transfer](https://github.com/emla2805/arbitrary-style-transfer)).
+* [Neural Style Transfer](doc/style-transfer.md) (NST) (via Tensorflow-Java and [Arbitrary Style Transfer](https://github.com/emla2805/arbitrary-style-transfer)).
 * [Object](doc/object-detection.md) [Detection](https://github.com/litan/kojo-ai-2/blob/master/src/main/kojo/object-detection-webcam.kojo) (via Tensorflow-Java).
 
 ### Get Started
