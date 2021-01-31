@@ -1,4 +1,4 @@
-### Linear Regression
+### Object Detection
 
 Before running this example, make sure that you have:
 * [Downloaded and installed](https://www.kogics.net/kojo-download) Kojo
