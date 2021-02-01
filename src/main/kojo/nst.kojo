@@ -2,10 +2,17 @@
 
 cleari()
 clearOutput()
+setBackground(white)
 
 val alpha = 0.8f
-val fltr1 = new NeuralStyleFilter("/path/to/savedmodel/", "/path/to/style.jpg", alpha)
-// val fltr2 = new NeuralStyleFilter("/path/to/savedmodel/", "/path/to/style2.jpg", alpha)
+
+// you need to change the following locations based on where you downloaded and extracted
+// the kojo-ai repository and the style transfer saved-model
+val kojoAiRoot = "/home/lalit/work/kojo-ai-2"
+val savedModel = "/home/lalit/work/arbitrary-style-transfer/savedmodel"
+
+val fltr1 = new NeuralStyleFilter(savedModel, s"$kojoAiRoot/images/style/woman_with_hat_matisse_cropped.jpg", alpha)
+val fltr2 = new NeuralStyleFilter(savedModel, s"$kojoAiRoot/images/style/sketch_cropped.png", alpha)
 
 val drawing = Picture {
     setPenColor(cm.gray)
@@ -23,7 +30,6 @@ val drawing = Picture {
 }
 
 val pic = effect(fltr1) -> drawing
-// or apply two filters
-// val pic = effect(fltr1) * effect(fltr2) -> drawing
+//val pic = effect(fltr2) * effect(fltr1) -> drawing
 
 draw(pic)

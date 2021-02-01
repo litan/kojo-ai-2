@@ -8,7 +8,12 @@ import org.tensorflow.types.TFloat32
 import org.tensorflow.types.TUint8
 import net.kogics.kojo.tensorutil._
 
-val labelsFile = scala.io.Source.fromFile("/home/lalit/work/kojo-ai-2/src/main/kojo/mscoco-labels.txt")
+// you need to change the following locations based on where you downloaded and extracted
+// the kojo-ai repository and the object detection saved-model
+val kojoAiRoot = "/home/lalit/work/kojo-ai-2"
+val savedModel = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
+
+val labelsFile = scala.io.Source.fromFile(s"$kojoAiRoot/src/main/kojo/mscoco-labels.txt")
 val labels = HashMap.empty[Int, String]
 labelsFile.getLines.zipWithIndex.foreach {
     case (line, idx) =>
@@ -65,23 +70,21 @@ cleari()
 clearOutput()
 setBackground(white)
 
-val model = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
-//val model = "/home/lalit/work/object-det/models/ssd_inception_v2_coco_2017_11_17/saved_model"
-val src = image("/home/lalit/Downloads/elephants.jpeg")
+val src = image(s"$kojoAiRoot/images/elephants-pixabay.jpg")
 
 val pic = Picture.image(src)
 draw(pic)
 
-val savedModel = SavedModelBundle.load(model)
+val model = SavedModelBundle.load(savedModel)
 val args = new util.HashMap[String, Tensor[_]]()
 val inputTensor = imgToTensorI(src)
 args.put("inputs", inputTensor)
-val out = savedModel.call(args)
+val out = model.call(args)
 val boxes = out.get("detection_boxes").asInstanceOf[Tensor[TFloat32]]
 val classes = out.get("detection_classes").asInstanceOf[Tensor[TFloat32]]
 val scores = out.get("detection_scores").asInstanceOf[Tensor[TFloat32]]
 val num = out.get("num_detections").asInstanceOf[Tensor[TFloat32]]
-savedModel.close()
+model.close()
 
 val detection = DetectionOutput(boxes, scores, classes, num)
 drawBoxes(detection)
