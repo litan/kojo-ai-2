@@ -10,8 +10,7 @@ After that, just run the example code below in Kojo.
 
 ### Sample Output
 
-![elephants-od.png](elephants-od.png)
-![horse-od.png](horse-od.png)
+![webcam-od.png](webcam-od.png)
 
 ### Code
 
