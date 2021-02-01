@@ -2,7 +2,8 @@
 
 Pre-requisites for running the example:
 * [Download and install](https://www.kogics.net/kojo-download) Kojo
-* Extract the kojo-ai libk directory for your platform under `~/kojo/lite` as explained in the [release notes](https://github.com/litan/kojo-ai-2/releases/tag/v0.2) for v0.2
+* Extract the kojo-ai libk directory for your platform under `~/kojo/lite` as explained in the [release notes](https://github.com/litan/kojo-ai-2/releases/tag/v0.2) for v0.2. This will *install* kojo-ai for you inside Kojo.
+* Clone (or download/extract) this repo (this will give you easy access to the [images](../images) required by some of the examples).
 * Download and extract the [saved model](https://github.com/litan/kojo-ai-2/releases/download/v0.2/object_detection_saved_model.zip) for this example.
 
 After that, just run the example code below in Kojo.
@@ -25,11 +26,12 @@ import org.tensorflow.types.TFloat32
 import org.tensorflow.types.TUint8
 import net.kogics.kojo.tensorutil._
 
-// you need to change the savedModel location based on where you downloaded the model
-val model = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
-//val model = "/home/lalit/work/object-det/models/ssd_inception_v2_coco_2017_11_17/saved_model"
+// you need to change the following locations based on where you downloaded and extracted 
+// the kojo-ai repository and the object detection saved-model
+val kojoAiRoot = "/home/lalit/work/kojo-ai-2"
+val savedModel = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
 
-val labelsFile = scala.io.Source.fromFile("/home/lalit/work/kojo-ai-2/src/main/kojo/mscoco-labels.txt")
+val labelsFile = scala.io.Source.fromFile(s"$kojoAiRoot/src/main/kojo/mscoco-labels.txt")
 val labels = HashMap.empty[Int, String]
 labelsFile.getLines.zipWithIndex.foreach {
     case (line, idx) =>
@@ -86,22 +88,21 @@ cleari()
 clearOutput()
 setBackground(white)
 
-val src = image("/home/lalit/work/kojo-ai-2/images/elephants-pixabay.jpg")
-// val src = image("/home/lalit/work/kojo-ai-2/images/horse-pixabay.jpg")
+val src = image(s"$kojoAiRoot/images/elephants-pixabay.jpg")
 
 val pic = Picture.image(src)
 draw(pic)
 
-val savedModel = SavedModelBundle.load(model)
+val model = SavedModelBundle.load(savedModel)
 val args = new util.HashMap[String, Tensor[_]]()
 val inputTensor = imgToTensorI(src)
 args.put("inputs", inputTensor)
-val out = savedModel.call(args)
+val out = model.call(args)
 val boxes = out.get("detection_boxes").asInstanceOf[Tensor[TFloat32]]
 val classes = out.get("detection_classes").asInstanceOf[Tensor[TFloat32]]
 val scores = out.get("detection_scores").asInstanceOf[Tensor[TFloat32]]
 val num = out.get("num_detections").asInstanceOf[Tensor[TFloat32]]
-savedModel.close()
+model.close()
 
 val detection = DetectionOutput(boxes, scores, classes, num)
 drawBoxes(detection)

@@ -6,8 +6,6 @@ Pre-requisites for running the example:
 * Clone (or download/extract) this repo (this will give you easy access to the [images](../images) required by some of the examples).
 * Download and extract the [saved model](https://github.com/litan/kojo-ai-2/releases/download/v0.1/savedmodel.zip) for this example.
 
-
-
 After that, just run the example code below in Kojo.
 
 ### Original Drawing, Style Image, and Final Output
