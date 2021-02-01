@@ -55,9 +55,13 @@ try {
     repeatWhile(!stop) {
         // get image
         val frame = webcam.getImage();
-        val pics2 = detectAndDraw(frame)
+        val pics2 = detect(frame)
         pics.foreach { pic =>
             pic.erase()
+        }
+        pics2.foreach { pic =>
+            pic.moveToFront()
+            pic.draw()
         }
         pics = pics2
         pause(delay)
@@ -70,7 +74,7 @@ finally {
 
 case class DetectionOutput(boxes: Tensor[TFloat32], scores: Tensor[TFloat32], classes: Tensor[TFloat32], num: Tensor[TFloat32])
 
-def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: ArrayBuffer[Picture]) {
+def detectBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: ArrayBuffer[Picture]) {
     val w = src.getWidth
     val h = src.getHeight
     val xmin = w * box(1)
@@ -79,13 +83,10 @@ def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: A
     val ymax = h - ymin1
     val ymax1 = h * box(2)
     val ymin = h - ymax1
-    //    println(xmin, xmax, ymin, ymax)
-    //    println(box)
     val bbox = Picture.rectangle(xmax - xmin, ymax - ymin)
     val bbox2 = Picture.rectangle(xmax - xmin, ymax - ymin)
     val lbl = Picture.text(label)
     val lbl2 = Picture.text(label)
-    draw(bbox2, bbox, lbl2, lbl)
     bbox.setPosition(xmin, ymin)
     bbox2.setPosition(xmin, ymin)
     bbox.setPenColor(ColorMaker.hsl(60, 0.91, 0.68))
@@ -99,26 +100,23 @@ def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: A
     pics2.append(bbox2, bbox, lbl2, lbl)
 }
 
-def drawBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
+def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
     val num = detectionOutput.num.data.getFloat().toInt
-    //    println(s"Objects detected: $num")
-    //    println(detectionOutput)
     for (i <- 0 until detectionOutput.boxes.shape.size(1).toInt) {
         val score = detectionOutput.scores.data.getFloat(0, i)
         if (score > 0.3) {
-            //            println(score)
             val box = ArrayBuffer.empty[Float]
             detectionOutput.boxes.data.get(0, i).scalars.forEach { x =>
                 box.append(x.getFloat())
             }
             val code = detectionOutput.classes.data.getFloat(0, i).toInt
             val label = labels.getOrElse(code, s"Unknown code - $code")
-            drawBox(src, box, label, pics2)
+            detectBox(src, box, label, pics2)
         }
     }
 }
 
-def detectAndDraw(src: BufferedImage): ArrayBuffer[Picture] = {
+def detect(src: BufferedImage): ArrayBuffer[Picture] = {
     val pics2 = ArrayBuffer.empty[Picture]
     val args = new util.HashMap[String, Tensor[_]]()
     val inputTensor = imgToTensorI(src)
@@ -132,7 +130,6 @@ def detectAndDraw(src: BufferedImage): ArrayBuffer[Picture] = {
     val detection = DetectionOutput(boxes, scores, classes, num)
     val pic = Picture.image(src)
     pics2.append(pic)
-    draw(pic)
-    drawBoxes(detection, src, pics2)
+    detectBoxes(detection, src, pics2)
     pics2
 }
