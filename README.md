@@ -8,7 +8,7 @@ A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This
 * Plotting (via XCharts).
 * [Graphs](https://github.com/litan/kojo-ai-2/blob/master/src/main/kojo/graph-workbench.kojo) (Bfs, Dfs, A* search, etc).
 * [Neural Style Transfer](doc/style-transfer.md) (NST) (via Tensorflow-Java and [Arbitrary Style Transfer](https://github.com/emla2805/arbitrary-style-transfer)).
-* [Object](doc/object-detection.md) [Detection](https://github.com/litan/kojo-ai-2/blob/master/src/main/kojo/object-detection-webcam.kojo) (via Tensorflow-Java).
+* [Object](doc/object-detection.md) [Detection](doc/object-detection-webcam.md) (via Tensorflow-Java).
 
 ### Get Started
 To use Kojo-AI within Kojo, just [use a published release](https://github.com/litan/kojo-ai-2/releases), or copy artifacts from this repo into the [Kojo](https://www.kogics.net/kojo) libk directory as per the following steps:  
