@@ -100,10 +100,8 @@ def detectBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2:
     pics2.append(bbox2, bbox, lbl2, lbl)
 }
 
-def drawBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
+def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
     val num = detectionOutput.num.getFloat().toInt
-    //    println(s"Objects detected: $num")
-    //    println(detectionOutput)
     for (i <- 0 until detectionOutput.boxes.shape.size(1).toInt) {
         val score = detectionOutput.scores.getFloat(0, i)
         if (score > 0.3) {
@@ -123,7 +121,7 @@ def detect(src: BufferedImage): ArrayBuffer[Picture] = {
     val args = new util.HashMap[String, Tensor]()
     val inputTensor = imgToTensorI(src)
     args.put("inputs", inputTensor)
-    val out = savedModel.call(args)
+    val out = model.call(args)
     val boxes = out.get("detection_boxes").asInstanceOf[TFloat32]
     val classes = out.get("detection_classes").asInstanceOf[TFloat32]
     val scores = out.get("detection_scores").asInstanceOf[TFloat32]
