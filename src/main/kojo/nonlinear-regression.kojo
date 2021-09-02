@@ -41,27 +41,27 @@ class NonlinearModel {
     val tf = Ops.create(graph)
     val session = new Session(graph)
 
-    def randomw(a: Int, b: Int) = tf.math.mul(tf.random.truncatedNormal(tf.array(a, b), TFloat32.DTYPE, TruncatedNormal.seed(100)), tf.constant(0.1f))
+    def randomw(a: Int, b: Int) = tf.math.mul(tf.random.truncatedNormal(tf.array(a, b), classOf[TFloat32], TruncatedNormal.seed(100)), tf.constant(0.1f))
 
     // Define variables
     val weight = tf.withName(WEIGHT_VARIABLE_NAME).variable(randomw(1, 50))
-    val bias = tf.withName(BIAS_VARIABLE_NAME).variable(Shape.of(50), TFloat32.DTYPE)
+    val bias = tf.withName(BIAS_VARIABLE_NAME).variable(Shape.of(50), classOf[TFloat32])
     tf.initAdd(tf.assign(bias, tf.zerosLike(bias)))
 
     val weight2 = tf.withName(WEIGHT_VARIABLE_NAME + "2").variable(randomw(50, 8))
-    val bias2 = tf.withName(BIAS_VARIABLE_NAME + "2").variable(Shape.of(8), TFloat32.DTYPE)
+    val bias2 = tf.withName(BIAS_VARIABLE_NAME + "2").variable(Shape.of(8), classOf[TFloat32])
     tf.initAdd(tf.assign(bias2, tf.zerosLike(bias2)))
 
     val weight3 = tf.withName(WEIGHT_VARIABLE_NAME + "3").variable(randomw(8, 1))
-    val bias3 = tf.withName(BIAS_VARIABLE_NAME + "3").variable(Shape.of(1), TFloat32.DTYPE)
+    val bias3 = tf.withName(BIAS_VARIABLE_NAME + "3").variable(Shape.of(1), classOf[TFloat32])
     tf.initAdd(tf.assign(bias3, tf.zerosLike(bias3)))
 
     tf.init()
 
     def placeholders = {
         // Define placeholders
-        val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
-        val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
+        val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.of(-1, 1)))
+        val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.of(-1, 1)))
         (xData, yData)
     }
 
@@ -110,9 +110,9 @@ class NonlinearModel {
         val yPredicted = modelFunction(xData, yData)
 
         val xTensor = TFloat32.tensorOf(Shape.of(xValues.length, 1), DataBuffers.of(xValues, true, false))
-        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
+        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
         val predictedY = new Array[Float](xValues.length)
-        val predictedYBuffer = yPredictedTensor.rawData().asFloats()
+        val predictedYBuffer = yPredictedTensor.asRawTensor().data().asFloats()
         predictedYBuffer.read(predictedY)
         xTensor.close(); yPredictedTensor.close()
         predictedY
