@@ -3,7 +3,7 @@
 
 val m = 3
 val c = 10
-val xData0 = Array.tabulate(50)(e => (e + 1.0))
+val xData0 = Array.tabulate(20)(e => (e + 1.0))
 val yData0 = xData0 map (_ * m + c + math.random() * 10 - 5)
 val normalizer = new StandardScaler()
 
@@ -39,8 +39,8 @@ class Model {
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
         val N = xValues.length
         // Define placeholders
-        val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
-        val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
+        val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.of(-1, 1)))
+        val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.of(-1, 1)))
 
         // Define the model function weight*x + bias
         val mul = tf.math.mul(xData, weight)
@@ -68,16 +68,16 @@ class Model {
 
     def predict(xValues: Array[Float]): Array[Float] = {
         // Define placeholders
-        val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
+        val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.of(-1, 1)))
 
         // Define the model function weight*x + bias
         val mul = tf.math.mul(xData, weight)
         val yPredicted = tf.math.add(mul, bias)
 
         val xTensor = TFloat32.tensorOf(Shape.of(xValues.length, 1), DataBuffers.of(xValues, true, false))
-        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
+        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
         val predictedY = new Array[Float](xValues.length)
-        val predictedYBuffer = yPredictedTensor.rawData().asFloats()
+        val predictedYBuffer = yPredictedTensor.asRawTensor.data.asFloats()
         predictedYBuffer.read(predictedY)
         predictedY
     }

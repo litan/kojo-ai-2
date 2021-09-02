@@ -39,8 +39,8 @@ class Model {
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
         val N = xValues.length
         // Define placeholders
-        val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
-        val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
+        val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
+        val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
 
         // Define the model function weight*x + bias
         val mul = tf.math.mul(xData, weight)
@@ -72,8 +72,8 @@ class Model {
 
     def predict(xValues: Array[Float]): Array[Float] = {
         // Define placeholders
-        val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
-        val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
+        val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
+        val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
 
         // Define the model function weight*x + bias
         val mul = tf.math.mul(xData, weight)
@@ -81,8 +81,8 @@ class Model {
 
         xValues.map { x =>
             val xTensor = TFloat32.scalarOf(x)
-            val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
-            val predictedY = yPredictedTensor.data.getFloat()
+            val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
+            val predictedY = yPredictedTensor.getFloat()
             xTensor.close()
             predictedY
         }
