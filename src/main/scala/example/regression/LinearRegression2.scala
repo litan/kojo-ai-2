@@ -1,19 +1,14 @@
 package example.regression
 
-import java.util.Random
-
-import example.regression.LinearRegression.{BIAS_VARIABLE_NAME, LEARNING_RATE, WEIGHT_VARIABLE_NAME}
+import net.kogics.kojo.plot._
+import net.kogics.kojo.preprocess.StandardScaler
+import org.knowm.xchart.SwingWrapper
 import org.tensorflow.framework.optimizers.GradientDescent
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.Ops
 import org.tensorflow.op.core.Placeholder
 import org.tensorflow.types.TFloat32
 import org.tensorflow.{Graph, Session}
-
-import scala.util.Using
-import org.knowm.xchart.SwingWrapper
-import net.kogics.kojo.plot._
-import net.kogics.kojo.preprocess.StandardScaler
 
 object LinearRegression2 {
 
@@ -57,8 +52,8 @@ object LinearRegression2 {
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
       val N = xValues.length
       // Define placeholders
-      val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
-      val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
+      val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
+      val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
 
       // Define the model function weight*x + bias
       val mul = tf.math.mul(xData, weight)
@@ -92,7 +87,7 @@ object LinearRegression2 {
 
     def predict(xValues: Array[Float]): Array[Float] = {
       // Define placeholders
-      val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
+      val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
 
       // Define the model function weight*x + bias
       val mul = tf.math.mul(xData, weight)
@@ -100,8 +95,8 @@ object LinearRegression2 {
 
       xValues.map { x =>
         val xTensor = TFloat32.scalarOf(x)
-        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
-        val predictedY = yPredictedTensor.data.getFloat()
+        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
+        val predictedY = yPredictedTensor.getFloat()
         System.out.println("Predicted value: " + predictedY)
         xTensor.close(); yPredictedTensor.close()
         predictedY

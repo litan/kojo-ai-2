@@ -72,7 +72,7 @@ finally {
     model.close()
 }
 
-case class DetectionOutput(boxes: Tensor[TFloat32], scores: Tensor[TFloat32], classes: Tensor[TFloat32], num: Tensor[TFloat32])
+case class DetectionOutput(boxes: TFloat32, scores: TFloat32, classes: TFloat32, num: TFloat32)
 
 def detectBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: ArrayBuffer[Picture]) {
     val w = src.getWidth
@@ -100,16 +100,18 @@ def detectBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2:
     pics2.append(bbox2, bbox, lbl2, lbl)
 }
 
-def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
-    val num = detectionOutput.num.data.getFloat().toInt
+def drawBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
+    val num = detectionOutput.num.getFloat().toInt
+    //    println(s"Objects detected: $num")
+    //    println(detectionOutput)
     for (i <- 0 until detectionOutput.boxes.shape.size(1).toInt) {
-        val score = detectionOutput.scores.data.getFloat(0, i)
+        val score = detectionOutput.scores.getFloat(0, i)
         if (score > 0.3) {
             val box = ArrayBuffer.empty[Float]
-            detectionOutput.boxes.data.get(0, i).scalars.forEach { x =>
+            detectionOutput.boxes.get(0, i).scalars.forEach { x =>
                 box.append(x.getFloat())
             }
-            val code = detectionOutput.classes.data.getFloat(0, i).toInt
+            val code = detectionOutput.classes.getFloat(0, i).toInt
             val label = labels.getOrElse(code, s"Unknown code - $code")
             detectBox(src, box, label, pics2)
         }
@@ -118,14 +120,14 @@ def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: Arr
 
 def detect(src: BufferedImage): ArrayBuffer[Picture] = {
     val pics2 = ArrayBuffer.empty[Picture]
-    val args = new util.HashMap[String, Tensor[_]]()
+    val args = new util.HashMap[String, Tensor]()
     val inputTensor = imgToTensorI(src)
     args.put("inputs", inputTensor)
-    val out = model.call(args)
-    val boxes = out.get("detection_boxes").asInstanceOf[Tensor[TFloat32]]
-    val classes = out.get("detection_classes").asInstanceOf[Tensor[TFloat32]]
-    val scores = out.get("detection_scores").asInstanceOf[Tensor[TFloat32]]
-    val num = out.get("num_detections").asInstanceOf[Tensor[TFloat32]]
+    val out = savedModel.call(args)
+    val boxes = out.get("detection_boxes").asInstanceOf[TFloat32]
+    val classes = out.get("detection_classes").asInstanceOf[TFloat32]
+    val scores = out.get("detection_scores").asInstanceOf[TFloat32]
+    val num = out.get("num_detections").asInstanceOf[TFloat32]
 
     val detection = DetectionOutput(boxes, scores, classes, num)
     val pic = Picture.image(src)

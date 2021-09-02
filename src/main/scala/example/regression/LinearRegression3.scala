@@ -53,8 +53,8 @@ object LinearRegression3 {
     def train(xValues: Array[Float], yValues: Array[Float]): Unit = {
       val N = xValues.length
       // Define placeholders
-      val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
-      val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
+      val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
+      val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
 
       // Define the model function weight*x + bias
       val mul = tf.math.mul(xData, weight)
@@ -82,17 +82,17 @@ object LinearRegression3 {
 
     def predict(xValues: Array[Float]): Array[Float] = {
       // Define placeholders
-      val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.of(-1, 1)))
+      val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.of(-1, 1)))
 
       // Define the model function weight*x + bias
       val mul = tf.math.mul(xData, weight)
       val yPredicted = tf.math.add(mul, bias)
 
       val xTensor = TFloat32.tensorOf(Shape.of(xValues.length, 1), DataBuffers.of(xValues, true, false))
-      val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
+      val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
       val predictedY = new Array[Float](xValues.length)
-      val predictedYBuffer = yPredictedTensor.rawData().asFloats()
-      predictedYBuffer.read(predictedY)
+      val xx = yPredictedTensor.asRawTensor().data().asFloats()
+      xx.read(predictedY)
       xTensor.close(); yPredictedTensor.close()
       predictedY
     }

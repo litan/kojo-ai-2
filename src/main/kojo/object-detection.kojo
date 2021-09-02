@@ -21,7 +21,7 @@ labelsFile.getLines.zipWithIndex.foreach {
 }
 labelsFile.close()
 
-case class DetectionOutput(boxes: Tensor[TFloat32], scores: Tensor[TFloat32], classes: Tensor[TFloat32], num: Tensor[TFloat32])
+case class DetectionOutput(boxes: TFloat32, scores: TFloat32, classes: TFloat32, num: TFloat32)
 
 def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String) {
     val w = src.getWidth
@@ -50,16 +50,16 @@ def drawBox(src: BufferedImage, box: ArrayBuffer[Float], label: String) {
 }
 
 def drawBoxes(detectionOutput: DetectionOutput) {
-    val num = detectionOutput.num.data.getFloat().toInt
+    val num = detectionOutput.num.getFloat().toInt
     for (i <- 0 until detectionOutput.boxes.shape.size(1).toInt) {
-        val score = detectionOutput.scores.data.getFloat(0, i)
+        val score = detectionOutput.scores.getFloat(0, i)
         if (score > 0.3) {
             println(score)
             val box = ArrayBuffer.empty[Float]
-            detectionOutput.boxes.data.get(0, i).scalars.forEach { x =>
+            detectionOutput.boxes.get(0, i).scalars.forEach { x =>
                 box.append(x.getFloat())
             }
-            val code = detectionOutput.classes.data.getFloat(0, i).toInt
+            val code = detectionOutput.classes.getFloat(0, i).toInt
             val label = labels.getOrElse(code, s"Unknown code - $code")
             drawBox(src, box, label)
         }
@@ -70,21 +70,23 @@ cleari()
 clearOutput()
 setBackground(white)
 
-val src = image(s"$kojoAiRoot/images/elephants-pixabay.jpg")
+val model = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
+//val model = "/home/lalit/work/object-det/models/ssd_inception_v2_coco_2017_11_17/saved_model"
+val src = image("/home/lalit/work/kojo-ai-2/images/elephants-pixabay.jpg")
 
 val pic = Picture.image(src)
 draw(pic)
 
-val model = SavedModelBundle.load(savedModel)
-val args = new util.HashMap[String, Tensor[_]]()
+val savedModel = SavedModelBundle.load(model)
+val args = new util.HashMap[String, Tensor]()
 val inputTensor = imgToTensorI(src)
 args.put("inputs", inputTensor)
-val out = model.call(args)
-val boxes = out.get("detection_boxes").asInstanceOf[Tensor[TFloat32]]
-val classes = out.get("detection_classes").asInstanceOf[Tensor[TFloat32]]
-val scores = out.get("detection_scores").asInstanceOf[Tensor[TFloat32]]
-val num = out.get("num_detections").asInstanceOf[Tensor[TFloat32]]
-model.close()
+val out = savedModel.call(args)
+val boxes = out.get("detection_boxes").asInstanceOf[TFloat32]
+val classes = out.get("detection_classes").asInstanceOf[TFloat32]
+val scores = out.get("detection_scores").asInstanceOf[TFloat32]
+val num = out.get("num_detections").asInstanceOf[TFloat32]
+savedModel.close()
 
 val detection = DetectionOutput(boxes, scores, classes, num)
 drawBoxes(detection)

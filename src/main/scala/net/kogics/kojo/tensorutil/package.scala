@@ -1,15 +1,14 @@
 package net.kogics.kojo
 
-import java.awt.image.BufferedImage
-
-import org.tensorflow.Tensor
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.ndarray.buffer.DataBuffers
 import org.tensorflow.types.{TFloat32, TUint8}
 
+import java.awt.image.BufferedImage
+
 package object tensorutil {
 
-  def imgToTensorF(image: BufferedImage): Tensor[TFloat32] = {
+  def imgToTensorF(image: BufferedImage): TFloat32 = {
     import java.nio.ByteBuffer
     val h = image.getHeight
     val w = image.getWidth
@@ -33,7 +32,7 @@ package object tensorutil {
     t2
   }
 
-  def imgToTensorI(image: BufferedImage): Tensor[TUint8] = {
+  def imgToTensorI(image: BufferedImage): TUint8 = {
     import java.nio.ByteBuffer
     val h = image.getHeight
     val w = image.getWidth
@@ -59,8 +58,8 @@ package object tensorutil {
 
   def clip(v: Int, min: Int, max: Int) = math.max(0, math.min(v, 255))
 
-  def tensorFToImg(tensor: Tensor[TFloat32]): BufferedImage = {
-    val data = tensor.rawData().asFloats()
+  def tensorFToImg(tensor: TFloat32): BufferedImage = {
+    val data = tensor.asRawTensor().data().asFloats()
     val h = tensor.shape.size(1).toInt
     val w = tensor.shape.size(2).toInt
     val img = new BufferedImage(w.toInt, h.toInt, BufferedImage.TYPE_INT_RGB)
@@ -79,8 +78,8 @@ package object tensorutil {
     img
   }
 
-  def tensorIToImg(tensor: Tensor[TUint8]): BufferedImage = {
-    val data = tensor.rawData()
+  def tensorIToImg(tensor: TUint8): BufferedImage = {
+    val data = tensor.asRawTensor().data()
     val h = tensor.shape.size(1).toInt
     val w = tensor.shape.size(2).toInt
     val img = new BufferedImage(w.toInt, h.toInt, BufferedImage.TYPE_INT_RGB)

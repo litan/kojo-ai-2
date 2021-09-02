@@ -1,14 +1,13 @@
 package example.regression
 
-import java.util.Random
-
 import org.tensorflow.framework.optimizers.GradientDescent
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.Ops
 import org.tensorflow.op.core.Placeholder
 import org.tensorflow.types.TFloat32
-import org.tensorflow.{Graph, Session, Tensor}
+import org.tensorflow.{Graph, Session}
 
+import java.util.Random
 import scala.util.Using
 
 object LinearRegression {
@@ -34,8 +33,8 @@ object LinearRegression {
     Using(new Graph) { graph =>
       val tf = Ops.create(graph)
       // Define placeholders
-      val xData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
-      val yData = tf.placeholder(TFloat32.DTYPE, Placeholder.shape(Shape.scalar))
+      val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
+      val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
 
       // Define variables
       val weight = tf.withName(WEIGHT_VARIABLE_NAME).variable(tf.constant(1f))
@@ -69,17 +68,17 @@ object LinearRegression {
 
         // Extract linear regression model weight and bias values
         val tensorList = session.runner.fetch(WEIGHT_VARIABLE_NAME).fetch(BIAS_VARIABLE_NAME).run
-        val weightValue = tensorList.get(0).expect(TFloat32.DTYPE)
-        val biasValue = tensorList.get(1).expect(TFloat32.DTYPE)
-        System.out.println("Weight is " + weightValue.data.getFloat())
-        System.out.println("Bias is " + biasValue.data.getFloat())
+        val weightValue = tensorList.get(0).asInstanceOf[TFloat32]
+        val biasValue = tensorList.get(1).asInstanceOf[TFloat32]
+        System.out.println("Weight is " + weightValue.getFloat())
+        System.out.println("Bias is " + biasValue.getFloat())
 
         // Let's predict y for x = 10f
         val x = 10f
         var predictedY = 0f
         val xTensor = TFloat32.scalarOf(x)
-        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).expect(TFloat32.DTYPE)
-        predictedY = yPredictedTensor.data.getFloat()
+        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
+        predictedY = yPredictedTensor.getFloat()
         xTensor.close(); yPredictedTensor.close()
         System.out.println("Predicted value: " + predictedY)
       }
