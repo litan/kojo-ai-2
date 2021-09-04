@@ -1,16 +1,19 @@
 // #include /nn.kojo
 // #include /plot.kojo
 
-val m = 3
-val c = 10
+cleari()
+clearOutput()
+
+val m = 10
+val c = 3
 val xData0 = Array.tabulate(20)(e => (e + 1.0))
-val yData0 = xData0 map (_ * m + c + math.random() * 10 - 5)
-val normalizer = new StandardScaler()
+val yData0 = xData0 map (_ * m + c + randomDouble(-15, 15))
 
 val chart = scatterChart("Regression Data", "X", "Y", xData0, yData0)
 chart.getStyler.setLegendVisible(true)
 drawChart(chart)
 
+val normalizer = new StandardScaler()
 val xData = normalizer.fitTransform(xData0)
 val yData = yData0
 
@@ -22,6 +25,7 @@ model.train(xDataf, yDataf)
 val yPreds = model.predict(xDataf)
 addLineToChart(chart, Some("model"), xData0, yPreds.map(_.toDouble))
 drawChart(chart)
+model.close()
 
 class Model {
     val LEARNING_RATE: Float = 0.1f
@@ -73,7 +77,6 @@ class Model {
     def predict(xValues: Array[Float]): Array[Float] = {
         // Define placeholders
         val xData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
-        val yData = tf.placeholder(classOf[TFloat32], Placeholder.shape(Shape.scalar))
 
         // Define the model function weight*x + bias
         val mul = tf.math.mul(xData, weight)
@@ -83,8 +86,13 @@ class Model {
             val xTensor = TFloat32.scalarOf(x)
             val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
             val predictedY = yPredictedTensor.getFloat()
-            xTensor.close()
+            xTensor.close(); yPredictedTensor.close()
             predictedY
         }
+    }
+
+    def close() {
+        session.close()
+        graph.close()
     }
 }
