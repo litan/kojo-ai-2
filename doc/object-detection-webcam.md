@@ -2,7 +2,7 @@
 
 Pre-requisites for running the example:
 * [Download and install](https://www.kogics.net/kojo-download) Kojo
-* Extract the kojo-ai libk directory for your platform under `~/kojo/lite` as explained in the [release notes](https://github.com/litan/kojo-ai-2/releases/tag/v0.2) for v0.2. This will *install* kojo-ai for you inside Kojo.
+* Extract the kojo-ai libk directory for your platform under `~/kojo/lite` as explained in the [release notes](https://github.com/litan/kojo-ai-2/releases/tag/v0.3) for v0.3. This will *install* kojo-ai for you inside Kojo.
 * Clone (or download/extract) this repo (this will give you easy access to the [images](../images) required by some of the examples).
 * Download and extract the [saved model](https://github.com/litan/kojo-ai-2/releases/download/v0.2/object_detection_saved_model.zip) for this example.
 
@@ -89,7 +89,7 @@ finally {
     model.close()
 }
 
-case class DetectionOutput(boxes: Tensor[TFloat32], scores: Tensor[TFloat32], classes: Tensor[TFloat32], num: Tensor[TFloat32])
+case class DetectionOutput(boxes: TFloat32, scores: TFloat32, classes: TFloat32, num: TFloat32)
 
 def detectBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2: ArrayBuffer[Picture]) {
     val w = src.getWidth
@@ -118,15 +118,15 @@ def detectBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2:
 }
 
 def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
-    val num = detectionOutput.num.data.getFloat().toInt
+    val num = detectionOutput.num.getFloat().toInt
     for (i <- 0 until detectionOutput.boxes.shape.size(1).toInt) {
-        val score = detectionOutput.scores.data.getFloat(0, i)
+        val score = detectionOutput.scores.getFloat(0, i)
         if (score > 0.3) {
             val box = ArrayBuffer.empty[Float]
-            detectionOutput.boxes.data.get(0, i).scalars.forEach { x =>
+            detectionOutput.boxes.get(0, i).scalars.forEach { x =>
                 box.append(x.getFloat())
             }
-            val code = detectionOutput.classes.data.getFloat(0, i).toInt
+            val code = detectionOutput.classes.getFloat(0, i).toInt
             val label = labels.getOrElse(code, s"Unknown code - $code")
             detectBox(src, box, label, pics2)
         }
@@ -135,14 +135,14 @@ def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: Arr
 
 def detect(src: BufferedImage): ArrayBuffer[Picture] = {
     val pics2 = ArrayBuffer.empty[Picture]
-    val args = new util.HashMap[String, Tensor[_]]()
+    val args = new util.HashMap[String, Tensor]()
     val inputTensor = imgToTensorI(src)
     args.put("inputs", inputTensor)
     val out = model.call(args)
-    val boxes = out.get("detection_boxes").asInstanceOf[Tensor[TFloat32]]
-    val classes = out.get("detection_classes").asInstanceOf[Tensor[TFloat32]]
-    val scores = out.get("detection_scores").asInstanceOf[Tensor[TFloat32]]
-    val num = out.get("num_detections").asInstanceOf[Tensor[TFloat32]]
+    val boxes = out.get("detection_boxes").asInstanceOf[TFloat32]
+    val classes = out.get("detection_classes").asInstanceOf[TFloat32]
+    val scores = out.get("detection_scores").asInstanceOf[TFloat32]
+    val num = out.get("num_detections").asInstanceOf[TFloat32]
 
     val detection = DetectionOutput(boxes, scores, classes, num)
     val pic = Picture.image(src)
