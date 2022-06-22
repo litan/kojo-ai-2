@@ -1,14 +1,14 @@
 name := "kojo-ai-2"
 
-version := "0.3"
+version := "0.4"
 
 scalaVersion := "2.13.3"
 
 scalacOptions := Seq("-feature", "-deprecation")
 
 libraryDependencies ++= Seq(
-  "org.tensorflow" % "tensorflow-core-platform" % "0.3.3",
-  "org.tensorflow" % "tensorflow-framework" % "0.3.3",
+  "org.tensorflow" % "tensorflow-core-platform" % "0.4.1",
+  "org.tensorflow" % "tensorflow-framework" % "0.4.1",
   "org.knowm.xchart" % "xchart" % "3.7.0",
   "org.apache.commons" % "commons-math3" % "3.6.1",
   "com.github.sarxos" % "webcam-capture" % "0.3.12"

@@ -53,8 +53,6 @@ object LinearRegression {
       val minimize = optimizer.minimize(mse)
 
       Using(new Session(graph)) { session =>
-        // Initialize graph variables
-        session.run(tf.init)
         // Train the model on data
         for (i <- xValues.indices) {
           val y = yValues(i)

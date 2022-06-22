@@ -45,18 +45,19 @@ class NonlinearModel {
 
     // Define variables
     val weight = tf.withName(WEIGHT_VARIABLE_NAME).variable(randomw(1, 50))
-    val bias = tf.withName(BIAS_VARIABLE_NAME).variable(Shape.of(50), classOf[TFloat32])
-    tf.initAdd(tf.assign(bias, tf.zerosLike(bias)))
+    val bias = tf.withName(BIAS_VARIABLE_NAME).variable(
+        tf.zeros(tf.constant(Shape.of(50)), classOf[TFloat32])
+    )
 
     val weight2 = tf.withName(WEIGHT_VARIABLE_NAME + "2").variable(randomw(50, 8))
-    val bias2 = tf.withName(BIAS_VARIABLE_NAME + "2").variable(Shape.of(8), classOf[TFloat32])
-    tf.initAdd(tf.assign(bias2, tf.zerosLike(bias2)))
+    val bias2 = tf.withName(BIAS_VARIABLE_NAME + "2").variable(
+        tf.zeros(tf.constant(Shape.of(8)), classOf[TFloat32])
+    )
 
     val weight3 = tf.withName(WEIGHT_VARIABLE_NAME + "3").variable(randomw(8, 1))
-    val bias3 = tf.withName(BIAS_VARIABLE_NAME + "3").variable(Shape.of(1), classOf[TFloat32])
-    tf.initAdd(tf.assign(bias3, tf.zerosLike(bias3)))
-
-    tf.init()
+    val bias3 = tf.withName(BIAS_VARIABLE_NAME + "3").variable(
+        tf.zeros(tf.constant(Shape.of(1)), classOf[TFloat32])
+    )
 
     def placeholders = {
         // Define placeholders
@@ -92,9 +93,6 @@ class NonlinearModel {
         // Back-propagate gradients to variables for training
         val optimizer = new GradientDescent(graph, LEARNING_RATE)
         val minimize = optimizer.minimize(mse)
-
-        // Initialize graph variables
-        session.run(tf.init)
 
         // Train the model on data
         for (epoch <- 1 to 1500) {

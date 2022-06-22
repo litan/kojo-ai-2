@@ -56,12 +56,12 @@ try {
         // get image
         val frame = webcam.getImage();
         val pics2 = detect(frame)
-        pics.foreach { pic =>
-            pic.erase()
-        }
         pics2.foreach { pic =>
             pic.moveToFront()
             pic.draw()
+        }
+        pics.foreach { pic =>
+            pic.erase()
         }
         pics = pics2
         pause(delay)

@@ -67,9 +67,6 @@ object LinearRegression2 {
       val optimizer = new GradientDescent(graph, LEARNING_RATE)
       val minimize = optimizer.minimize(mse)
 
-      // Initialize graph variables
-      session.run(tf.init)
-
       // Train the model on data
       for (epoch <- 1 to 40) {
         for (i <- xValues.indices) {
