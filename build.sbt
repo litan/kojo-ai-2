@@ -6,13 +6,33 @@ scalaVersion := "2.13.6"
 
 scalacOptions := Seq("-feature", "-deprecation")
 
+val javacppVersion = "1.5.9"
+
+// Platform classifier for native library dependencies
+val platform = org.bytedeco.javacpp.Loader.Detector.getPlatform
+
+// JavaCPP-Preset libraries with native dependencies
+val presetLibs = Seq(
+  "opencv"   -> "4.7.0",
+  "ffmpeg"   -> "6.0",
+  "openblas" -> "0.3.23"
+).flatMap { case (lib, ver) =>
+  Seq(
+    "org.bytedeco" % lib % s"$ver-$javacppVersion",
+    "org.bytedeco" % lib % s"$ver-$javacppVersion" classifier platform
+  )
+}
+
 libraryDependencies ++= Seq(
   "org.tensorflow" % "tensorflow-core-platform" % "0.5.0",
   "org.tensorflow" % "tensorflow-framework" % "0.5.0",
   "org.knowm.xchart" % "xchart" % "3.7.0",
   "org.apache.commons" % "commons-math3" % "3.6.1",
-  "com.github.sarxos" % "webcam-capture" % "0.3.12"
-)
+  "com.github.sarxos" % "webcam-capture" % "0.3.12",
+  "org.bytedeco" % "javacpp" % javacppVersion,
+  "org.bytedeco" % "javacpp" % javacppVersion classifier platform,
+  "org.bytedeco" % "javacv" % javacppVersion,
+) ++ presetLibs
 
 //Build distribution
 val distOutpath             = settingKey[File]("Where to copy all dependencies and kojo")
