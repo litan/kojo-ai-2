@@ -122,10 +122,10 @@ def detect(src: BufferedImage): ArrayBuffer[Picture] = {
     val inputTensor = imgToTensorI(src)
     args.put("inputs", inputTensor)
     val out = model.call(args)
-    val boxes = out.get("detection_boxes").asInstanceOf[TFloat32]
-    val classes = out.get("detection_classes").asInstanceOf[TFloat32]
-    val scores = out.get("detection_scores").asInstanceOf[TFloat32]
-    val num = out.get("num_detections").asInstanceOf[TFloat32]
+    val boxes = out.get("detection_boxes").get.asInstanceOf[TFloat32]
+    val classes = out.get("detection_classes").get.asInstanceOf[TFloat32]
+    val scores = out.get("detection_scores").get.asInstanceOf[TFloat32]
+    val num = out.get("num_detections").get.asInstanceOf[TFloat32]
 
     val detection = DetectionOutput(boxes, scores, classes, num)
     val pic = Picture.image(src)

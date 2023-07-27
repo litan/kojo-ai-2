@@ -9,7 +9,7 @@ val alpha = 0.8f
 // you need to change the following locations based on where you downloaded and extracted
 // the kojo-ai repository and the style transfer saved-model
 val kojoAiRoot = "/home/lalit/work/kojo-ai-2"
-val savedModel = "/home/lalit/work/arbitrary-style-transfer/savedmodel"
+val savedModel = "/home/lalit/work/nst/savedmodel/"
 
 val fltr1 = new NeuralStyleFilter(savedModel, s"$kojoAiRoot/images/style/woman_with_hat_matisse_cropped.jpg", alpha)
 val fltr2 = new NeuralStyleFilter(savedModel, s"$kojoAiRoot/images/style/sketch_cropped.png", alpha)

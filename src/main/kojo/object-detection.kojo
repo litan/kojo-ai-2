@@ -80,10 +80,10 @@ val args = new util.HashMap[String, Tensor]()
 val inputTensor = imgToTensorI(src)
 args.put("inputs", inputTensor)
 val out = model.call(args)
-val boxes = out.get("detection_boxes").asInstanceOf[TFloat32]
-val classes = out.get("detection_classes").asInstanceOf[TFloat32]
-val scores = out.get("detection_scores").asInstanceOf[TFloat32]
-val num = out.get("num_detections").asInstanceOf[TFloat32]
+val boxes = out.get("detection_boxes").get.asInstanceOf[TFloat32]
+val classes = out.get("detection_classes").get.asInstanceOf[TFloat32]
+val scores = out.get("detection_scores").get.asInstanceOf[TFloat32]
+val num = out.get("num_detections").get.asInstanceOf[TFloat32]
 model.close()
 
 val detection = DetectionOutput(boxes, scores, classes, num)

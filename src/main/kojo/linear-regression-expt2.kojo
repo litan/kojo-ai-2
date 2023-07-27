@@ -58,9 +58,6 @@ class Model {
         val optimizer = new GradientDescent(graph, LEARNING_RATE)
         val minimize = optimizer.minimize(mse)
 
-        // Initialize graph variables
-        session.run(tf.init)
-
         // Train the model on data
         for (_ <- 1 to 40) {
             val xTensor = TFloat32.tensorOf(Shape.of(N, 1), DataBuffers.of(xValues, true, false))

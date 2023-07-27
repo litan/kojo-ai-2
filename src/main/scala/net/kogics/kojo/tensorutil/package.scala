@@ -60,8 +60,8 @@ package object tensorutil {
 
   def tensorFToImg(tensor: TFloat32): BufferedImage = {
     val data = tensor.asRawTensor().data().asFloats()
-    val h = tensor.shape.size(1).toInt
-    val w = tensor.shape.size(2).toInt
+    val h = tensor.shape.get(1).toInt
+    val w = tensor.shape.get(2).toInt
     val img = new BufferedImage(w.toInt, h.toInt, BufferedImage.TYPE_INT_RGB)
     var index = 0
 
@@ -80,8 +80,8 @@ package object tensorutil {
 
   def tensorIToImg(tensor: TUint8): BufferedImage = {
     val data = tensor.asRawTensor().data()
-    val h = tensor.shape.size(1).toInt
-    val w = tensor.shape.size(2).toInt
+    val h = tensor.shape.get(1).toInt
+    val w = tensor.shape.get(2).toInt
     val img = new BufferedImage(w.toInt, h.toInt, BufferedImage.TYPE_INT_RGB)
     var index = 0
 

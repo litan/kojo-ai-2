@@ -161,7 +161,7 @@ package object plot {
                categories: Seq[String], counts: Seq[Int]): CategoryChart = {
     val chart = makeCategoryChart(title, xtitle, ytitle)
     val total = counts.sum
-    addBarsToChart(chart, None, categories, counts.map(e => new java.lang.Double(e * 100.0 / total)))
+    addBarsToChart(chart, None, categories, counts.map(e => java.lang.Double.valueOf(e * 100.0 / total)))
   }
 
   def pieChart(title: String, categories: Seq[String], counts: Seq[Int]): PieChart = {

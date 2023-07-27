@@ -21,7 +21,7 @@ class NeuralStyleFilter(savedModelFile: String, styleImageFile: String, alpha: F
             args.put("args_0", inputTensor)
             args.put("args_0_1", styleTensor)
             args.put("args_0_2", TFloat32.scalarOf(alpha))
-            val out = use(model.call(args).get("output_1").asInstanceOf[TFloat32])
+            val out = use(model.call(args).get("output_1").get.asInstanceOf[TFloat32])
             tensorFToImg(out)
         }.get
     }
