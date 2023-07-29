@@ -1,3 +1,6 @@
+// This example will no longer work, until the webcam capture
+// code is transitioned to JavaCV
+
 import java.awt.image.BufferedImage
 import java.util
 import org.tensorflow.Tensor

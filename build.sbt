@@ -1,4 +1,4 @@
-name := "kojo-ai-2"
+name := "kojo-ai"
 
 version := "0.5"
 
@@ -28,7 +28,6 @@ libraryDependencies ++= Seq(
   "org.tensorflow" % "tensorflow-framework" % "0.5.0",
   "org.knowm.xchart" % "xchart" % "3.7.0",
   "org.apache.commons" % "commons-math3" % "3.6.1",
-  "com.github.sarxos" % "webcam-capture" % "0.3.12",
   "org.bytedeco" % "javacpp" % javacppVersion,
   "org.bytedeco" % "javacpp" % javacppVersion classifier platform,
   "org.bytedeco" % "javacv" % javacppVersion,
