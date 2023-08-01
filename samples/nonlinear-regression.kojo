@@ -1,5 +1,6 @@
 // #include /nn.kojo
 // #include /plot.kojo
+import org.tensorflow.Operand
 
 cleari()
 clearOutput()
@@ -9,7 +10,7 @@ val b = 3
 val c = 1
 
 val xData0 = Array.tabulate(20)(e => (e + 1).toDouble)
-val yData0 = xData0 map (x => a * x * x + b * x + c + random(-15, 15))
+val yData0 = xData0 map (x => a * x * x + b * x + c + random(-5, 5))
 
 val xNormalizer = new StandardScaler()
 val yNormalizer = new StandardScaler()
@@ -32,32 +33,31 @@ addLineToChart(chart, Some("model"), xData0, yPreds0)
 drawChart(chart)
 model.close()
 
+import org.tensorflow.op.core.{ Shape => ShapeT }
+
 class NonlinearModel {
     val LEARNING_RATE: Float = 0.1f
-    val WEIGHT_VARIABLE_NAME: String = "weight"
-    val BIAS_VARIABLE_NAME: String = "bias"
 
     val graph = new Graph
     val tf = Ops.create(graph)
     val session = new Session(graph)
 
-    def randomw(a: Int, b: Int) = tf.math.mul(tf.random.truncatedNormal(tf.array(a, b), classOf[TFloat32], TruncatedNormal.seed(100)), tf.constant(0.1f))
+    // truncated normal with shape [a, b]
+    def randomw(a: Int, b: Int) =
+        tf.math.mul(
+            tf.random.truncatedNormal(tf.array(a, b), classOf[TFloat32]),
+            tf.constant(0.1f)
+        )
 
     // Define variables
-    val weight = tf.withName(WEIGHT_VARIABLE_NAME).variable(randomw(1, 50))
-    val bias = tf.withName(BIAS_VARIABLE_NAME).variable(
-        tf.zeros(tf.constant(Shape.of(50)), classOf[TFloat32])
-    )
+    val weight = tf.variable(randomw(1, 50))
+    val bias = tf.variable(tf.zeros(tf.array(50), classOf[TFloat32]))
 
-    val weight2 = tf.withName(WEIGHT_VARIABLE_NAME + "2").variable(randomw(50, 8))
-    val bias2 = tf.withName(BIAS_VARIABLE_NAME + "2").variable(
-        tf.zeros(tf.constant(Shape.of(8)), classOf[TFloat32])
-    )
+    val weight2 = tf.variable(randomw(50, 8))
+    val bias2 = tf.variable(tf.zeros(tf.array(8), classOf[TFloat32]))
 
-    val weight3 = tf.withName(WEIGHT_VARIABLE_NAME + "3").variable(randomw(8, 1))
-    val bias3 = tf.withName(BIAS_VARIABLE_NAME + "3").variable(
-        tf.zeros(tf.constant(Shape.of(1)), classOf[TFloat32])
-    )
+    val weight3 = tf.variable(randomw(8, 1))
+    val bias3 = tf.variable(tf.zeros(tf.array(1), classOf[TFloat32]))
 
     def placeholders = {
         // Define placeholders
@@ -66,7 +66,9 @@ class NonlinearModel {
         (xData, yData)
     }
 
-    def modelFunction(xData: Placeholder[TFloat32], yData: Placeholder[TFloat32]) = {
+    def modelFunction(
+        xData: Placeholder[TFloat32],
+        yData: Placeholder[TFloat32]): Operand[TFloat32] = {
         // Define the model function
         val mul = tf.linalg.matMul(xData, weight)
         val add = tf.math.add(mul, bias)
@@ -87,18 +89,28 @@ class NonlinearModel {
         val yPredicted = modelFunction(xData, yData)
 
         // Define loss function MSE
-        val sum = tf.math.pow(tf.math.sub(yPredicted, yData), tf.constant(2f))
-        val mse = tf.math.div(sum, tf.constant(2f * N))
+        val sum = tf.math.pow(tf.math.sub(yData, yPredicted), tf.constant(2f))
+        val mse = tf.math.div(sum, tf.constant(N.toFloat))
 
         // Back-propagate gradients to variables for training
         val optimizer = new GradientDescent(graph, LEARNING_RATE)
         val minimize = optimizer.minimize(mse)
 
         // Train the model on data
-        for (epoch <- 1 to 1500) {
-            val xTensor = TFloat32.tensorOf(Shape.of(N, 1), DataBuffers.of(xValues, true, false))
-            val yTensor = TFloat32.tensorOf(Shape.of(N, 1), DataBuffers.of(yValues, true, false))
-            session.runner.addTarget(minimize).feed(xData.asOutput, xTensor).feed(yData.asOutput, yTensor).run
+        for (epoch <- 1 to 500) {
+            val xTensor = TFloat32.tensorOf(
+                Shape.of(N, 1),
+                DataBuffers.of(xValues, true, false)
+            )
+            val yTensor = TFloat32.tensorOf(
+                Shape.of(N, 1),
+                DataBuffers.of(yValues, true, false)
+            )
+            session.runner
+                .addTarget(minimize)
+                .feed(xData.asOutput, xTensor)
+                .feed(yData.asOutput, yTensor)
+                .run()
             xTensor.close(); yTensor.close()
         }
     }
@@ -107,8 +119,15 @@ class NonlinearModel {
         val (xData, yData) = placeholders
         val yPredicted = modelFunction(xData, yData)
 
-        val xTensor = TFloat32.tensorOf(Shape.of(xValues.length, 1), DataBuffers.of(xValues, true, false))
-        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
+        val xTensor = TFloat32.tensorOf(
+            Shape.of(xValues.length, 1),
+            DataBuffers.of(xValues, true, false)
+        )
+        val yPredictedTensor = session.runner
+            .feed(xData, xTensor)
+            .fetch(yPredicted)
+            .run().get(0).asInstanceOf[TFloat32]
+
         val predictedY = new Array[Float](xValues.length)
         val predictedYBuffer = yPredictedTensor.asRawTensor().data().asFloats()
         predictedYBuffer.read(predictedY)

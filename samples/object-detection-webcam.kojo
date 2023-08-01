@@ -1,6 +1,3 @@
-// This example will no longer work, until the webcam capture
-// code is transitioned to JavaCV
-
 import java.awt.image.BufferedImage
 import java.util
 import org.tensorflow.Tensor
@@ -8,44 +5,30 @@ import org.tensorflow.ndarray.Shape
 import org.tensorflow.ndarray.buffer.DataBuffers
 import org.tensorflow.types.TFloat32
 import org.tensorflow.types.TUint8
-import com.github.sarxos.webcam.Webcam
 import org.tensorflow.SavedModelBundle
 import net.kogics.kojo.tensorutil._
 
-// you need to change the following locations based on where you downloaded and extracted
-// the kojo-ai repository and the object detection saved-model
+import org.bytedeco.javacv._
+import org.bytedeco.opencv.global.opencv_core.CV_32F
+import org.bytedeco.opencv.global.opencv_dnn.{ readNetFromCaffe, blobFromImage }
+import org.bytedeco.opencv.opencv_core.{ Rect, Mat, Size, Scalar, Point }
+import org.bytedeco.javacpp.indexer.FloatIndexer
+import org.bytedeco.opencv.global.opencv_imgproc.rectangle
+import org.bytedeco.opencv.global.opencv_imgproc.resize
+import org.bytedeco.opencv.global.opencv_imgcodecs.imread
+
 val kojoAiRoot = "/home/lalit/work/kojo-ai-2"
 val savedModel = "/home/lalit/work/object-det/models/ssdlite_mobilenet_v2_coco_2018_05_09/saved_model"
 
 val fps = 5
 cleari()
 val cb = canvasBounds
-val webcam = Webcam.getDefault()
-println(webcam)
-val views = webcam.getViewSizes
-val idx = views.length - 1
-val selectedView = views(idx)
-webcam.setViewSize(selectedView)
-webcam.open()
-
-zoom(1, selectedView.getWidth / 2, selectedView.getHeight / 2)
-
-var stop = false
-val stopBtn = picStackCentered(
-    fillColor(red) -> Picture.rectangle(100, 50),
-    penColor(black) -> Picture.text("Stop")
-)
-stopBtn.onMouseClick { (x, y) =>
-    stop = true
-}
-stopBtn.setPosition(-110, -60)
-draw(stopBtn)
 
 var pics = ArrayBuffer.empty[Picture]
 
 val model = SavedModelBundle.load(savedModel)
 
-val labelsFile = scala.io.Source.fromFile(s"$kojoAiRoot/src/main/kojo/mscoco-labels.txt")
+val labelsFile = scala.io.Source.fromFile(s"$kojoAiRoot/samples/mscoco-labels.txt")
 val labels = HashMap.empty[Int, String]
 labelsFile.getLines.zipWithIndex.foreach {
     case (line, idx) =>
@@ -53,26 +36,43 @@ labelsFile.getLines.zipWithIndex.foreach {
 }
 labelsFile.close()
 
-try {
-    val delay = 1.0 / fps
-    repeatWhile(!stop) {
-        // get image
-        val frame = webcam.getImage();
-        val pics2 = detect(frame)
-        pics2.foreach { pic =>
-            pic.moveToFront()
-            pic.draw()
+var lastFrameTime = epochTimeMillis
+
+def detectSequence(grabber: FrameGrabber): Unit = {
+    val delay = 1000.0 / fps
+
+    grabber.start()
+    try {
+        var frame = grabber.grab()
+        while (frame != null) {
+            frame = grabber.grab()
+            val currTime = epochTimeMillis
+            if (currTime - lastFrameTime > delay) {
+                val bufImg = Java2DFrameUtils.toBufferedImage(frame)
+                if (bufImg != null) {
+                    bufImg.getWidth
+                    val pics2 = detect(bufImg)
+                    pics2.foreach { pic =>
+                        pic.moveToFront()
+                        pic.translate(-bufImg.getWidth / 2, -bufImg.getHeight / 2)
+                        pic.draw()
+                    }
+                    pics.foreach { pic =>
+                        pic.erase()
+                    }
+                    pics = pics2
+                    lastFrameTime = currTime
+                }
+            }
         }
-        pics.foreach { pic =>
-            pic.erase()
-        }
-        pics = pics2
-        pause(delay)
     }
-}
-finally {
-    webcam.close()
-    model.close()
+    catch {
+        case _ => // eat up interruption
+    }
+    finally {
+        grabber.stop()
+        model.close()
+    }
 }
 
 case class DetectionOutput(boxes: TFloat32, scores: TFloat32, classes: TFloat32, num: TFloat32)
@@ -104,8 +104,9 @@ def detectBox(src: BufferedImage, box: ArrayBuffer[Float], label: String, pics2:
 }
 
 def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: ArrayBuffer[Picture]) {
-    val num = detectionOutput.num.getFloat().toInt
-    for (i <- 0 until detectionOutput.boxes.shape.size(1).toInt) {
+//    val num = detectionOutput.num.getFloat().toInt
+    val foundLabels = HashSet.empty[String]
+    for (i <- 0 until detectionOutput.boxes.shape.get(1).toInt) {
         val score = detectionOutput.scores.getFloat(0, i)
         if (score > 0.3) {
             val box = ArrayBuffer.empty[Float]
@@ -115,8 +116,10 @@ def detectBoxes(detectionOutput: DetectionOutput, src: BufferedImage, pics2: Arr
             val code = detectionOutput.classes.getFloat(0, i).toInt
             val label = labels.getOrElse(code, s"Unknown code - $code")
             detectBox(src, box, label, pics2)
+            foundLabels.add(label)
         }
     }
+    checkLabels(foundLabels)
 }
 
 def detect(src: BufferedImage): ArrayBuffer[Picture] = {
@@ -135,4 +138,23 @@ def detect(src: BufferedImage): ArrayBuffer[Picture] = {
     pics2.append(pic)
     detectBoxes(detection, src, pics2)
     pics2
+}
+
+val iRadius = 30
+val indicator = Picture.circle(iRadius)
+indicator.setPenColor(gray)
+
+indicator.setPosition(cb.x + (cb.width - 2 * iRadius) / 2 + iRadius, cb.y + 50)
+draw(indicator)
+
+val grabber = new FFmpegFrameGrabber("/dev/video0");
+detectSequence(grabber)
+
+def checkLabels(labels: MSet[String]) {
+    if (labels.contains("person")) {
+        indicator.setFillColor(red)
+    }
+    else {
+        indicator.setFillColor(green)
+    }
 }
