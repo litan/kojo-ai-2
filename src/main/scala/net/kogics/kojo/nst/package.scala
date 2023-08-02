@@ -1,8 +1,8 @@
 package net.kogics.kojo
 
 package object nst {
-  import java.awt.Color
   import java.awt.image.BufferedImage
+  import java.awt.Color
 
   def removeAlphaChannel(img: BufferedImage, color: Color = Color.white): BufferedImage = {
     if (!img.getColorModel().hasAlpha()) {

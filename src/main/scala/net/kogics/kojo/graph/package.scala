@@ -15,9 +15,9 @@
 package net.kogics.kojo
 
 import scala.collection.mutable
+import scala.collection.mutable.{ Map => MMap }
+import scala.collection.mutable.{ Set => MSet }
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.{Map => MMap}
-import scala.collection.mutable.{Set => MSet}
 
 package object graph {
   trait Container[T] {
@@ -54,7 +54,7 @@ package object graph {
     case class TwithCost(t: T, cost: Double)
     implicit val TwithCostOrdering = new Ordering[TwithCost] {
       override def compare(x: TwithCost, y: TwithCost): Int = {
-        -x.cost compare -y.cost
+        -x.cost.compare(-y.cost)
       }
     }
     val impl = collection.mutable.PriorityQueue.empty[TwithCost]
@@ -90,41 +90,64 @@ package object graph {
     type HeuristicFn[T] = (Node[T], Node[T]) => Double
 
     def noOpCallback[T](n: Node[T]): Unit = {}
-    def dfs[T](graph: Graph[T], start: Node[T], end: Node[T],
-               visitCallback: Node[T] => Unit = noOpCallback _): Option[PathEdges[T]] = {
+    def dfs[T](
+        graph: Graph[T],
+        start: Node[T],
+        end: Node[T],
+        visitCallback: Node[T] => Unit = noOpCallback _
+    ): Option[PathEdges[T]] = {
       def cost(pathEdges: PathEdges[T], end: Node[T]): Double = 0
       val container = new Stack[ContainerElem[T]]
       searchWithCost(graph, start, end, container, visitCallback, cost)
     }
 
-    def bfs[T](graph: Graph[T], start: Node[T], end: Node[T],
-               visitCallback: Node[T] => Unit = noOpCallback _): Option[PathEdges[T]] = {
+    def bfs[T](
+        graph: Graph[T],
+        start: Node[T],
+        end: Node[T],
+        visitCallback: Node[T] => Unit = noOpCallback _
+    ): Option[PathEdges[T]] = {
       def cost(pathEdges: PathEdges[T], end: Node[T]): Double = 0
       val container = new Queue[ContainerElem[T]]
       searchWithCost(graph, start, end, container, visitCallback, cost)
     }
 
-    private def pathDistance[T](pathEdges: PathEdges[T]): Double = pathEdges.foldLeft(0.0) { case (d, e) => d + e.distance }
+    private def pathDistance[T](pathEdges: PathEdges[T]): Double = pathEdges.foldLeft(0.0) {
+      case (d, e) => d + e.distance
+    }
 
-    def ucs[T](graph: Graph[T], start: Node[T], end: Node[T],
-               visitCallback: Node[T] => Unit = noOpCallback _): Option[PathEdges[T]] = {
+    def ucs[T](
+        graph: Graph[T],
+        start: Node[T],
+        end: Node[T],
+        visitCallback: Node[T] => Unit = noOpCallback _
+    ): Option[PathEdges[T]] = {
       def cost(pathEdges: PathEdges[T], end: Node[T]): Double = pathDistance(pathEdges)
       val container = new PriorityQueue[ContainerElem[T]]
       searchWithCost(graph, start, end, container, visitCallback, cost)
     }
 
-    def astarSearch[T](graph: Graph[T], start: Node[T], end: Node[T],
-                       visitCallback: Node[T] => Unit = noOpCallback _,
-                       heuristic:     HeuristicFn[T]): Option[PathEdges[T]] = {
-      def cost(pathEdges: PathEdges[T], end: Node[T]): Double = pathDistance(pathEdges) + heuristic(pathEdges.last.node, end)
+    def astarSearch[T](
+        graph: Graph[T],
+        start: Node[T],
+        end: Node[T],
+        visitCallback: Node[T] => Unit = noOpCallback _,
+        heuristic: HeuristicFn[T]
+    ): Option[PathEdges[T]] = {
+      def cost(pathEdges: PathEdges[T], end: Node[T]): Double =
+        pathDistance(pathEdges) + heuristic(pathEdges.last.node, end)
       val container = new PriorityQueue[ContainerElem[T]]
       searchWithCost(graph, start, end, container, visitCallback, cost)
     }
 
-    def searchWithCost[T](graph: Graph[T], start: Node[T], end: Node[T],
-                          container:     Container[ContainerElem[T]],
-                          visitCallback: Node[T] => Unit,
-                          costFn:        CostFn[T]): Option[PathEdges[T]] = {
+    def searchWithCost[T](
+        graph: Graph[T],
+        start: Node[T],
+        end: Node[T],
+        container: Container[ContainerElem[T]],
+        visitCallback: Node[T] => Unit,
+        costFn: CostFn[T]
+    ): Option[PathEdges[T]] = {
       if (start == end) {
         Some(ArrayBuffer())
       }

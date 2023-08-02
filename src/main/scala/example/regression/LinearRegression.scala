@@ -1,24 +1,25 @@
 package example.regression
 
-import org.tensorflow.framework.optimizers.GradientDescent
-import org.tensorflow.ndarray.Shape
-import org.tensorflow.op.Ops
-import org.tensorflow.op.core.Placeholder
-import org.tensorflow.types.TFloat32
-import org.tensorflow.{Graph, Session}
-
 import java.util.Random
+
 import scala.util.Using
 
+import org.tensorflow.framework.optimizers.GradientDescent
+import org.tensorflow.ndarray.Shape
+import org.tensorflow.op.core.Placeholder
+import org.tensorflow.op.Ops
+import org.tensorflow.types.TFloat32
+import org.tensorflow.Graph
+import org.tensorflow.Session
+
 object LinearRegression {
-  /**
-   * Amount of data points.
-   */
+
+  /** Amount of data points.
+    */
   private val N: Int = 10
 
-  /**
-   * This value is used to fill the Y placeholder in prediction.
-   */
+  /** This value is used to fill the Y placeholder in prediction.
+    */
   val LEARNING_RATE: Float = 0.1f
   val WEIGHT_VARIABLE_NAME: String = "weight"
   val BIAS_VARIABLE_NAME: String = "bias"
@@ -75,7 +76,8 @@ object LinearRegression {
         val x = 10f
         var predictedY = 0f
         val xTensor = TFloat32.scalarOf(x)
-        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
+        val yPredictedTensor =
+          session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
         predictedY = yPredictedTensor.getFloat()
         xTensor.close(); yPredictedTensor.close()
         System.out.println("Predicted value: " + predictedY)

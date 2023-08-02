@@ -5,18 +5,19 @@ import net.kogics.kojo.preprocess.StandardScaler
 import org.knowm.xchart.SwingWrapper
 import org.tensorflow.framework.optimizers.GradientDescent
 import org.tensorflow.ndarray.Shape
-import org.tensorflow.op.Ops
 import org.tensorflow.op.core.Placeholder
+import org.tensorflow.op.Ops
 import org.tensorflow.types.TFloat32
-import org.tensorflow.{Graph, Session}
+import org.tensorflow.Graph
+import org.tensorflow.Session
 
 object LinearRegression2 {
 
   def main(args: Array[String]): Unit = {
     val m = 3
     val c = 10
-    val xData0 = Array.tabulate(20)(e => (e + 1.0))
-    val yData0 = xData0 map (_ * m + c + math.random() * 10 - 5)
+    val xData0 = Array.tabulate(20)(e => e + 1.0)
+    val yData0 = xData0.map(_ * m + c + math.random() * 10 - 5)
     val normalizer = new StandardScaler()
 
     val chart = scatterChart("Regression Data", "X", "Y", xData0, yData0)
@@ -92,7 +93,8 @@ object LinearRegression2 {
 
       xValues.map { x =>
         val xTensor = TFloat32.scalarOf(x)
-        val yPredictedTensor = session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
+        val yPredictedTensor =
+          session.runner.feed(xData.asOutput, xTensor).fetch(yPredicted).run.get(0).asInstanceOf[TFloat32]
         val predictedY = yPredictedTensor.getFloat()
         System.out.println("Predicted value: " + predictedY)
         xTensor.close(); yPredictedTensor.close()

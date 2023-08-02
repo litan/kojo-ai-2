@@ -26,6 +26,7 @@ package object preprocess {
       transform(data)
     }
   }
+
   class StandardScaler extends Scaler {
     var mean = 0.0
     var std = 0.0
@@ -35,11 +36,11 @@ package object preprocess {
     }
 
     def transform(data: Array[Double]) = {
-      data map (e => (e - mean) / std)
+      data.map(e => (e - mean) / std)
     }
 
     def inverseTransform(data: Array[Double]) = {
-      data map (e => e * std + mean)
+      data.map(e => e * std + mean)
     }
   }
 
@@ -49,11 +50,11 @@ package object preprocess {
       absMax = data.max.abs
     }
     def transform(data: Array[Double]): Array[Double] = {
-      data map (_ / absMax)
+      data.map(_ / absMax)
     }
 
     def inverseTransform(data: Array[Double]): Array[Double] = {
-      data map (_ * absMax)
+      data.map(_ * absMax)
     }
   }
 }

@@ -16,22 +16,20 @@ package net.kogics.kojo
 
 import java.util
 
-import org.knowm.xchart.CategoryChart
-import org.knowm.xchart.CategoryChartBuilder
-import org.knowm.xchart.CategorySeries
-import org.knowm.xchart.Histogram
-import org.knowm.xchart.PieChart
-import org.knowm.xchart.PieChartBuilder
-import org.knowm.xchart.XYChart
-import org.knowm.xchart.XYChartBuilder
-import org.knowm.xchart.XYSeries
-import org.knowm.xchart.XYSeries.XYSeriesRenderStyle
+import org.knowm.xchart._
 import org.knowm.xchart.style.Styler.ChartTheme
+import org.knowm.xchart.XYSeries.XYSeriesRenderStyle
 
 package object plot {
   private def makeXYChart(title: String, xtitle: String, ytitle: String): XYChart = {
-    val chart = new XYChartBuilder().width(800).height(600).title(title).
-      xAxisTitle(xtitle).yAxisTitle(ytitle).theme(ChartTheme.GGPlot2).build()
+    val chart = new XYChartBuilder()
+      .width(800)
+      .height(600)
+      .title(title)
+      .xAxisTitle(xtitle)
+      .yAxisTitle(ytitle)
+      .theme(ChartTheme.GGPlot2)
+      .build()
     chart.getStyler.setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Scatter)
     chart.getStyler.setChartTitleVisible(true)
     chart.getStyler.setAxisTitlesVisible(true)
@@ -43,21 +41,31 @@ package object plot {
   }
 
   private def makeCategoryChart(title: String, xtitle: String, ytitle: String): CategoryChart = {
-    val chart = new CategoryChartBuilder().width(800).height(600).title(title).
-      xAxisTitle(xtitle).yAxisTitle(ytitle).theme(ChartTheme.GGPlot2).build()
+    val chart = new CategoryChartBuilder()
+      .width(800)
+      .height(600)
+      .title(title)
+      .xAxisTitle(xtitle)
+      .yAxisTitle(ytitle)
+      .theme(ChartTheme.GGPlot2)
+      .build()
     chart.getStyler.setChartTitleVisible(true)
     chart.getStyler.setAxisTitlesVisible(true)
     chart
   }
 
   private def makePieChart(title: String): PieChart = {
-    val chart = new PieChartBuilder().width(800).height(600).title(title).
-      theme(ChartTheme.GGPlot2).build()
+    val chart = new PieChartBuilder().width(800).height(600).title(title).theme(ChartTheme.GGPlot2).build()
     chart.getStyler.setChartTitleVisible(true)
     chart
   }
 
-  private def addXYSeriesToChart(chart: XYChart, lineName: Option[String], xs: Array[Double], ys: Array[Double]): XYSeries = {
+  private def addXYSeriesToChart(
+      chart: XYChart,
+      lineName: Option[String],
+      xs: Array[Double],
+      ys: Array[Double]
+  ): XYSeries = {
     lineName match {
       case Some(name) =>
         chart.getStyler.setLegendVisible(true)
@@ -68,7 +76,12 @@ package object plot {
     }
   }
 
-  private def addCategorySeriesToChart[N <: Number](chart: CategoryChart, name: Option[String], categories: Seq[String], values: Seq[N]): CategorySeries = {
+  private def addCategorySeriesToChart[N <: Number](
+      chart: CategoryChart,
+      name: Option[String],
+      categories: Seq[String],
+      values: Seq[N]
+  ): CategorySeries = {
     def asJavaList[A, B](xs: Seq[B]) = {
       import scala.jdk.CollectionConverters._
       xs.asJava.asInstanceOf[java.util.List[A]]
@@ -93,7 +106,12 @@ package object plot {
     chart
   }
 
-  private def addHistogramSeriesToChart(chart: CategoryChart, name: Option[String], xs: Array[Double], bins: Int): CategorySeries = {
+  private def addHistogramSeriesToChart(
+      chart: CategoryChart,
+      name: Option[String],
+      xs: Array[Double],
+      bins: Int
+  ): CategorySeries = {
     def asJavaCollection(xs: Array[Double]) = {
       val al = new util.ArrayList[java.lang.Double]
       xs.foreach(al.add(_))
@@ -127,7 +145,12 @@ package object plot {
     chart
   }
 
-  def addBarsToChart[N <: Number](chart: CategoryChart, name: Option[String], categories: Seq[String], values: Seq[N]): CategoryChart = {
+  def addBarsToChart[N <: Number](
+      chart: CategoryChart,
+      name: Option[String],
+      categories: Seq[String],
+      values: Seq[N]
+  ): CategoryChart = {
     val series = addCategorySeriesToChart(chart, name, categories, values)
     //    series.setLineColor()
     chart
@@ -145,20 +168,23 @@ package object plot {
     chart
   }
 
-  def scatterChart(title: String, xtitle: String, ytitle: String,
-                   xs: Array[Double], ys: Array[Double]): XYChart = {
+  def scatterChart(title: String, xtitle: String, ytitle: String, xs: Array[Double], ys: Array[Double]): XYChart = {
     val chart = makeXYChart(title, xtitle, ytitle)
     addPointsToChart(chart, None, xs, ys)
   }
 
-  def lineChart(title: String, xtitle: String, ytitle: String,
-                xs: Array[Double], ys: Array[Double]): XYChart = {
+  def lineChart(title: String, xtitle: String, ytitle: String, xs: Array[Double], ys: Array[Double]): XYChart = {
     val chart = makeXYChart(title, xtitle, ytitle)
     addLineToChart(chart, None, xs, ys)
   }
 
-  def barChart(title: String, xtitle: String, ytitle: String,
-               categories: Seq[String], counts: Seq[Int]): CategoryChart = {
+  def barChart(
+      title: String,
+      xtitle: String,
+      ytitle: String,
+      categories: Seq[String],
+      counts: Seq[Int]
+  ): CategoryChart = {
     val chart = makeCategoryChart(title, xtitle, ytitle)
     val total = counts.sum
     addBarsToChart(chart, None, categories, counts.map(e => java.lang.Double.valueOf(e * 100.0 / total)))

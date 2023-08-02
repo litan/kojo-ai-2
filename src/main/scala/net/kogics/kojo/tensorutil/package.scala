@@ -1,10 +1,11 @@
 package net.kogics.kojo
 
-import org.tensorflow.ndarray.Shape
-import org.tensorflow.ndarray.buffer.DataBuffers
-import org.tensorflow.types.{TFloat32, TUint8}
-
 import java.awt.image.BufferedImage
+
+import org.tensorflow.ndarray.buffer.DataBuffers
+import org.tensorflow.ndarray.Shape
+import org.tensorflow.types.TFloat32
+import org.tensorflow.types.TUint8
 
 package object tensorutil {
 
