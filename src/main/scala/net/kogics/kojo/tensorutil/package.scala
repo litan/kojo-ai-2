@@ -9,7 +9,7 @@ import org.tensorflow.types.TUint8
 
 package object tensorutil {
 
-  def imgToTensorF(image: BufferedImage): TFloat32 = {
+  def imgToTensorF(image: BufferedImage, divFactor: Float): TFloat32 = {
     import java.nio.ByteBuffer
     val h = image.getHeight
     val w = image.getWidth
@@ -21,9 +21,9 @@ package object tensorutil {
         val red = (pixel >> 16) & 0xff
         val green = (pixel >> 8) & 0xff
         val blue = pixel & 0xff
-        imgBuffer.putFloat(red.toFloat)
-        imgBuffer.putFloat(green.toFloat)
-        imgBuffer.putFloat(blue.toFloat)
+        imgBuffer.putFloat(red.toFloat / divFactor)
+        imgBuffer.putFloat(green.toFloat / divFactor)
+        imgBuffer.putFloat(blue.toFloat / divFactor)
       }
     }
     imgBuffer.flip()
@@ -59,7 +59,7 @@ package object tensorutil {
 
   def clip(v: Int, min: Int, max: Int) = math.max(0, math.min(v, 255))
 
-  def tensorFToImg(tensor: TFloat32): BufferedImage = {
+  def tensorFToImg(tensor: TFloat32, mulFactor: Float): BufferedImage = {
     val data = tensor.asRawTensor().data().asFloats()
     val h = tensor.shape.get(1).toInt
     val w = tensor.shape.get(2).toInt
@@ -69,9 +69,9 @@ package object tensorutil {
     for (y <- 0 until h) {
       for (x <- 0 until w) {
         val alpha = 0
-        val r = clip(data.getFloat(index).toInt, 0, 255); index += 1
-        val g = clip(data.getFloat(index).toInt, 0, 255); index += 1
-        val b = clip(data.getFloat(index).toInt, 0, 255); index += 1
+        val r = clip((data.getFloat(index) * mulFactor).toInt, 0, 255); index += 1
+        val g = clip((data.getFloat(index) * mulFactor).toInt, 0, 255); index += 1
+        val b = clip((data.getFloat(index) * mulFactor).toInt, 0, 255); index += 1
         val rgb = alpha << 24 | r << 16 | g << 8 | b
         img.setRGB(x, y, rgb)
       }
