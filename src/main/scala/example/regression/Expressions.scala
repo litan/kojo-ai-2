@@ -1,4 +1,4 @@
-package examples.p1
+package example.regression
 
 import java.util
 

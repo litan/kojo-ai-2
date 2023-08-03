@@ -33,6 +33,32 @@ package object tensorutil {
     t2
   }
 
+  def imgToTensorF(
+      image: BufferedImage,
+      scaler: (Float, Float, Float) => (Float, Float, Float)
+  ): TFloat32 = {
+    import java.nio.ByteBuffer
+    val h = image.getHeight
+    val w = image.getWidth
+    val imgBuffer = ByteBuffer.allocate(h * w * 3 * 4)
+
+    for (y <- 0 until h) {
+      for (x <- 0 until w) {
+        val pixel = image.getRGB(x, y)
+        val red = (pixel >> 16) & 0xff
+        val green = (pixel >> 8) & 0xff
+        val blue = pixel & 0xff
+        val (r, g, b) = scaler(red.toFloat, blue.toFloat, green.toFloat)
+        imgBuffer.putFloat(r); imgBuffer.putFloat(g); imgBuffer.putFloat(b)
+      }
+    }
+    imgBuffer.flip()
+    val shape = Shape.of(1, image.getHeight, image.getWidth, 3)
+    val db = DataBuffers.of(imgBuffer).asFloats()
+    val t2 = TFloat32.tensorOf(shape, db)
+    t2
+  }
+
   def imgToTensorI(image: BufferedImage): TUint8 = {
     import java.nio.ByteBuffer
     val h = image.getHeight
