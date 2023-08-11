@@ -31,7 +31,9 @@ class NeuralStyleFilter(savedModelFile: String, styleImageFile: String, alpha: F
 class NeuralStyleFilter2(savedModelFile: String, styleImageFile: String) extends ImageOp {
     val scaleFactor = 255f
     val styleImage = image(styleImageFile)
-    val styleTensor = imgToTensorF(removeAlphaChannel(styleImage, white), scaleFactor)
+    val styleTensor = modifyStyle(imgToTensorF(removeAlphaChannel(styleImage, white), scaleFactor))
+
+    def modifyStyle(t: TFloat32): TFloat32 = t
 
     def filter(src: BufferedImage) = {
         Using.Manager { use =>
@@ -43,6 +45,21 @@ class NeuralStyleFilter2(savedModelFile: String, styleImageFile: String) extends
             val out = use(model.call(args).get("output_0").get.asInstanceOf[TFloat32])
             tensorFToImg(out, scaleFactor)
         }.get
+    }
+}
+
+class NeuralStyleFilter2b(savedModelFile: String, styleImageFile: String, styleBlur: Int)
+    extends NeuralStyleFilter2(savedModelFile: String, styleImageFile: String) {
+    require(styleBlur > 2 && styleBlur < 13, "style blur should be between 3 and 12 (included)")
+    override def modifyStyle(t: TFloat32): TFloat32 = {
+        val tf = org.tensorflow.op.Ops.create()
+        import java.util.Arrays
+        tf.nn.avgPool(
+            tf.constant(t),
+            Arrays.asList(1, 3, 3, 1),
+            Arrays.asList(1, 1, 1, 1),
+            "SAME"
+        ).asTensor()
     }
 }
 
