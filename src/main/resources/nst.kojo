@@ -12,26 +12,39 @@ import net.kogics.kojo.tensorutil._
 class NeuralStyleFilter(savedModelFile: String, styleImageFile: String, alpha: Float) extends ImageOp {
     val scaleFactor = 1f
     val styleImage = image(styleImageFile)
-    val styleTensor = imgToTensorF(removeAlphaChannel(styleImage, white), scaleFactor)
+    val styleTensor = imgToTensorF(removeAlphaChannel(styleImage, white))
 
     def filter(src: BufferedImage) = {
         Using.Manager { use =>
             val model = use(SavedModelBundle.load(savedModelFile))
             val args = new HashMap[String, Tensor]()
-            val inputTensor = imgToTensorF(removeAlphaChannel(src, white), scaleFactor)
+            val inputTensor = imgToTensorF(removeAlphaChannel(src, white))
             args.put("args_0", inputTensor)
             args.put("args_0_1", styleTensor)
             args.put("args_0_2", TFloat32.scalarOf(alpha))
             val out = use(model.call(args).get("output_1").get.asInstanceOf[TFloat32])
-            tensorFToImg(out, scaleFactor)
+            tensorFToImg(out)
         }.get
     }
 }
 
 class NeuralStyleFilter2(savedModelFile: String, styleImageFile: String) extends ImageOp {
     val scaleFactor = 255f
+    def scaleDown(r: Float, g: Float, b: Float): (Float, Float, Float) = {
+        val d = scaleFactor
+        (r / d, g / d, b / d)
+    }
+
+    def scaleUp(r: Float, g: Float, b: Float): (Float, Float, Float) = {
+        val d = scaleFactor
+        (r * d, g * d, b * d)
+    }
+
     val styleImage = image(styleImageFile)
-    val styleTensor = modifyStyle(imgToTensorF(removeAlphaChannel(styleImage, white), scaleFactor))
+    val styleTensor =
+        modifyStyle(
+            imgToTensorF(removeAlphaChannel(styleImage, white), Some(scaleDown _))
+        )
 
     def modifyStyle(t: TFloat32): TFloat32 = t
 
@@ -39,11 +52,11 @@ class NeuralStyleFilter2(savedModelFile: String, styleImageFile: String) extends
         Using.Manager { use =>
             val model = use(SavedModelBundle.load(savedModelFile))
             val args = new HashMap[String, Tensor]()
-            val inputTensor = imgToTensorF(removeAlphaChannel(src, white), scaleFactor)
+            val inputTensor = imgToTensorF(removeAlphaChannel(src, white), Some(scaleDown _))
             args.put("placeholder", inputTensor)
             args.put("placeholder_1", styleTensor)
             val out = use(model.call(args).get("output_0").get.asInstanceOf[TFloat32])
-            tensorFToImg(out, scaleFactor)
+            tensorFToImg(out, Some(scaleUp _))
         }.get
     }
 }
@@ -56,7 +69,7 @@ class NeuralStyleFilter2b(savedModelFile: String, styleImageFile: String, styleB
         import java.util.Arrays
         tf.nn.avgPool(
             tf.constant(t),
-            Arrays.asList(1, 3, 3, 1),
+            Arrays.asList(1, styleBlur, styleBlur, 1),
             Arrays.asList(1, 1, 1, 1),
             "SAME"
         ).asTensor()
