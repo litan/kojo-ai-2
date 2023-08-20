@@ -11,10 +11,19 @@ import org.tensorflow.types.TFloat32
 import org.tensorflow.types.TUint8
 
 package object tensorutil {
-  type PixelScalar = (Float, Float, Float) => (Float, Float, Float)
+  type PixelFloatScalar = (Float, Float, Float) => (Float, Float, Float)
+  type PixelIntScalar = (Int, Int, Int) => (Int, Int, Int)
 
   trait ImageReader {
     def getRGB(x: Int, y: Int): Int
+  }
+
+  object ImageReader {
+    def create(image: BufferedImage): ImageReader = image.getType match {
+      case BufferedImage.TYPE_INT_RGB   => new ImageReader_INT_RGB(image)
+      case BufferedImage.TYPE_3BYTE_BGR => new ImageReader_3BYTE_BGR(image)
+      case _                            => throw new RuntimeException("Unknown Image Type")
+    }
   }
 
   class ImageReader_INT_RGB(image: BufferedImage) extends ImageReader {
@@ -41,14 +50,11 @@ package object tensorutil {
 
   def imgToTensorF(
       image: BufferedImage,
-      oScaler: Option[PixelScalar] = None
+      oScaler: Option[PixelFloatScalar] = None
   ): TFloat32 = {
     val imgHeight = image.getHeight
     val imgWidth = image.getWidth
-    val imgr: ImageReader =
-      if (image.getType == BufferedImage.TYPE_INT_RGB) new ImageReader_INT_RGB(image)
-      else if (image.getType == BufferedImage.TYPE_3BYTE_BGR) new ImageReader_3BYTE_BGR(image)
-      else throw new RuntimeException("Unknown Image Type")
+    val imgReader = ImageReader.create(image)
 
     val shape = Shape.of(1, imgHeight, imgWidth, 3)
 
@@ -57,7 +63,7 @@ package object tensorutil {
       (tensor: TFloat32) => {
         for (y <- 0 until imgHeight) {
           for (x <- 0 until imgWidth) {
-            val pixel = imgr.getRGB(x, y)
+            val pixel = imgReader.getRGB(x, y)
             val red = (pixel >> 16) & 0xff
             val green = (pixel >> 8) & 0xff
             val blue = pixel & 0xff
@@ -74,37 +80,45 @@ package object tensorutil {
     )
   }
 
-  def imgToTensorI(image: BufferedImage): TUint8 = {
-    import java.nio.ByteBuffer
-    val h = image.getHeight
-    val w = image.getWidth
-    val imgBuffer = ByteBuffer.allocate(h * w * 3)
+  def imgToTensorI(
+      image: BufferedImage,
+      oScaler: Option[PixelIntScalar] = None
+  ): TUint8 = {
+    val imgHeight = image.getHeight
+    val imgWidth = image.getWidth
+    val imgReader = ImageReader.create(image)
 
-    for (y <- 0 until h) {
-      for (x <- 0 until w) {
-        val pixel = image.getRGB(x, y)
-        val red = (pixel >> 16) & 0xff
-        val green = (pixel >> 8) & 0xff
-        val blue = pixel & 0xff
-        imgBuffer.put(red.toByte)
-        imgBuffer.put(green.toByte)
-        imgBuffer.put(blue.toByte)
+    val shape = Shape.of(1, imgHeight, imgWidth, 3)
+
+    TUint8.tensorOf(
+      shape,
+      (tensor: TUint8) => {
+        for (y <- 0 until imgHeight) {
+          for (x <- 0 until imgWidth) {
+            val pixel = imgReader.getRGB(x, y)
+            val red = (pixel >> 16) & 0xff
+            val green = (pixel >> 8) & 0xff
+            val blue = pixel & 0xff
+            val (r, g, b) = oScaler match {
+              case Some(scaler) => scaler(red, green, blue)
+              case None         => (red, green, blue)
+            }
+            tensor.setByte(r.toByte, 0, y, x, 0)
+            tensor.setByte(g.toByte, 0, y, x, 1)
+            tensor.setByte(b.toByte, 0, y, x, 2)
+          }
+        }
       }
-    }
-    imgBuffer.flip()
-    val shape = Shape.of(1, image.getHeight, image.getWidth, 3)
-    val db = DataBuffers.of(imgBuffer)
-    val t2 = TUint8.tensorOf(shape, db)
-    t2
+    )
   }
 
   def clip(v: Int, min: Int, max: Int) = math.max(0, math.min(v, 255))
 
-  def tensorFToImg(tensor: TFloat32, oScaler: Option[PixelScalar] = None): BufferedImage = {
+  def tensorFToImg(tensor: TFloat32, oScaler: Option[PixelFloatScalar] = None): BufferedImage = {
     val data = tensor.asRawTensor().data().asFloats()
     val h = tensor.shape.get(1).toInt
     val w = tensor.shape.get(2).toInt
-    val img = new BufferedImage(w.toInt, h.toInt, BufferedImage.TYPE_INT_RGB)
+    val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
     val imgRaster = img.getRaster
     var index = 0
 
@@ -131,22 +145,33 @@ package object tensorutil {
     img
   }
 
-  def tensorIToImg(tensor: TUint8): BufferedImage = {
+  def tensorIToImg(tensor: TUint8, oScaler: Option[PixelIntScalar] = None): BufferedImage = {
     val data = tensor.asRawTensor().data()
     val h = tensor.shape.get(1).toInt
     val w = tensor.shape.get(2).toInt
-    val img = new BufferedImage(w.toInt, h.toInt, BufferedImage.TYPE_INT_RGB)
+    val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
+    val imgRaster = img.getRaster
     var index = 0
 
+    val pixels = new Array[Int](w)
     for (y <- 0 until h) {
       for (x <- 0 until w) {
-        val alpha = 0
-        val r = toUnsignedInt(data.getByte(index)); index += 1
-        val g = toUnsignedInt(data.getByte(index)); index += 1
-        val b = toUnsignedInt(data.getByte(index)); index += 1
-        val rgb = alpha << 24 | r << 16 | g << 8 | b
-        img.setRGB(x, y, rgb)
+        val red = toUnsignedInt(data.getByte(index)); index += 1
+        val green = toUnsignedInt(data.getByte(index)); index += 1
+        val blue = toUnsignedInt(data.getByte(index)); index += 1
+
+        val (r0, g0, b0) = oScaler match {
+          case Some(scaler) => scaler(red, green, blue)
+          case None => (red, green, blue)
+        }
+
+        val r = clip(r0, 0, 255)
+        val g = clip(g0, 0, 255)
+        val b = clip(b0, 0, 255)
+        val rgb = r << 16 | g << 8 | b
+        pixels(x) = rgb
       }
+      imgRaster.setDataElements(0, y, w, 1, pixels)
     }
     img
   }
