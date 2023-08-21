@@ -10,7 +10,6 @@ import net.kogics.kojo.nst._
 import net.kogics.kojo.tensorutil._
 
 class NeuralStyleFilter(savedModelFile: String, styleImageFile: String, alpha: Float) extends ImageOp {
-    val scaleFactor = 1f
     val styleImage = image(styleImageFile)
     val styleTensor = imgToTensorF(removeAlphaChannel(styleImage))
 
@@ -75,4 +74,3 @@ class NeuralStyleFilter2b(savedModelFile: String, styleImageFile: String, styleB
         ).asTensor()
     }
 }
-
