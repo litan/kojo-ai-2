@@ -22,8 +22,12 @@ package object tensorutil {
     def create(image: BufferedImage): ImageReader = image.getType match {
       case BufferedImage.TYPE_INT_RGB   => new ImageReader_INT_RGB(image)
       case BufferedImage.TYPE_3BYTE_BGR => new ImageReader_3BYTE_BGR(image)
-      case _                            => throw new RuntimeException("Unknown Image Type")
+      case _                            => new ImageReaderGeneric(image)
     }
+  }
+
+  class ImageReaderGeneric(image: BufferedImage) extends ImageReader {
+    def getRGB(x: Int, y: Int): Int = image.getRGB(x, y)
   }
 
   class ImageReader_INT_RGB(image: BufferedImage) extends ImageReader {
@@ -162,7 +166,7 @@ package object tensorutil {
 
         val (r0, g0, b0) = oScaler match {
           case Some(scaler) => scaler(red, green, blue)
-          case None => (red, green, blue)
+          case None         => (red, green, blue)
         }
 
         val r = clip(r0, 0, 255)
