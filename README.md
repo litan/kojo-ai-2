@@ -1,7 +1,10 @@
-# Kojo-AI
+*This repo is in archival mode. Check out https://github.com/litan/kojo-ai-3 for the current version of kojo-ai*
+
+## Kojo-AI
 Support for data science, machine learning, and more - within [Kojo](https://www.kogics.net/kojo).
 
-A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai. This is the next cut, based on the official [Tensorflow-Java](https://github.com/tensorflow/java) API.
+A previous cut of kojo-ai is available at https://github.com/litan/kojo-ai.  
+The next cut of kojo-ai is available at https://github.com/litan/kojo-ai-3. 
 
 ### Current Features (work in progress, but functional):
 * [Neural](doc/linear-regression.md) [Networks](doc/nonlinear-regression.md) (via Tensorflow-Java).
